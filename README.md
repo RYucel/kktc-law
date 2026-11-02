@@ -1,5 +1,8 @@
 # kktc-law — KKTC Mevzuatı için Deterministik Git Külliyatı
 
+[![CI](https://github.com/RYucel/kktc-law/actions/workflows/ci-and-update.yml/badge.svg)](https://github.com/RYucel/kktc-law/actions/workflows/ci-and-update.yml)
+[![License: MIT](https://img.shields.io/github/license/RYucel/kktc-law)](https://github.com/RYucel/kktc-law/blob/main/LICENSE)
+
 Kuzey Kıbrıs Türk Cumhuriyeti mevzuatını (Fasıllar, Yasalar, Anayasa) her maddesi ayrı bir
 Markdown dosyası, her yürürlük/değişiklik olayı ise tarihsel ve **deterministik** bir Git commit'i
 olacak şekilde kodlayan araç seti.
