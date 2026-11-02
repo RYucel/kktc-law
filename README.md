@@ -7,6 +7,8 @@ Kuzey Kıbrıs Türk Cumhuriyeti mevzuatını (Fasıllar, Yasalar, Anayasa) her 
 Markdown dosyası, her yürürlük/değişiklik olayı ise tarihsel ve **deterministik** bir Git commit'i
 olacak şekilde kodlayan araç seti.
 
+Kapsamlı kullanım, Python API, MCP ve GitHub otomasyon rehberi: [GUIDE.md](GUIDE.md).
+
 ## Durum
 
 | Faz | İçerik | Durum |

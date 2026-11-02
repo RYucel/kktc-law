@@ -7,6 +7,8 @@ Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar
 
 ### Eklenenler
 
+- `GUIDE.md` — CLI, Python API, MCP, veri modeli, determinizm ve GitHub otomasyonu için
+  kapsamlı LLM-dostu rehber.
 - `kktc-law log` — yürürlük tarihi ve yasa filtresiyle commit günlüğü.
 - `kktc-law changes` — iki tarih arasındaki eklenen/değişen/silinen madde ve metadata
   değişiklikleri; hibrit replay'de yalnızca metadata'da işaretlenen maddeler de gösterilir.
