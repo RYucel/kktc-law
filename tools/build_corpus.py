@@ -514,6 +514,13 @@ def build(
             help="İnşa öncesi fihristi tarayıp --from-cache dizinini doldurur.",
         ),
     ] = False,
+    scrape_only: Annotated[
+        bool,
+        typer.Option(
+            "--scrape-only",
+            help="Yalnızca fihristi tarayıp önbelleği doldurur; külliyat inşa etmez.",
+        ),
+    ] = False,
     index_url: Annotated[
         str,
         typer.Option("--index-url", help="--scrape için mahkemeler.net fihrist adresi."),
@@ -570,10 +577,12 @@ def build(
         )
     if limit is not None and limit < 1:
         raise typer.BadParameter("--limit en az 1 olmalıdır")
-    if scrape:
+    if scrape_only and from_cache is None:
+        raise typer.BadParameter("--scrape-only yalnızca --from-cache ile kullanılabilir.")
+    if scrape or scrape_only:
         if from_cache is None:
             raise typer.BadParameter(
-                "--scrape yalnızca --from-cache ile birlikte kullanılabilir."
+                "--scrape/--scrape-only yalnızca --from-cache ile birlikte kullanılabilir."
             )
         _scrape_into(
             from_cache,
@@ -582,6 +591,16 @@ def build(
             matches=match,
             strict=strict,
         )
+    if scrape_only:
+        manifest = load_cache_manifest(from_cache)
+        typer.echo(
+            json.dumps(
+                {"cached_documents": len(manifest.entries)},
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+        )
+        return
 
     builder = CorpusBuilder(
         repo_path,

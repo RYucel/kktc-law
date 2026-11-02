@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
 
@@ -39,10 +39,10 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
 
@@ -54,13 +54,20 @@ jobs:
       - name: Install Python dependencies
         run: uv sync --extra dev
 
-      - name: Fetch updates and build pilot corpus
+      - name: Fetch updates into raw cache
         run: |
           rm -rf corpus_repo corpus_repo_check
           uv run python -m tools.build_corpus \
             --repo-path corpus_repo \
             --from-cache raw_cache \
-            --scrape \
+            --scrape-only \
+            --limit 80
+
+      - name: Build selected 50-law corpus
+        run: |
+          uv run python -m tools.build_corpus \
+            --repo-path corpus_repo \
+            --from-cache raw_cache \
             --limit 50
 
       - name: Verify deterministic rebuild
