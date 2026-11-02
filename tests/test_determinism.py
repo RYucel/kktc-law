@@ -8,7 +8,6 @@ döndürdüğünü doğrular.
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import stat
 from pathlib import Path
@@ -149,10 +148,10 @@ def _build_repo(
 
 
 def _force_rmtree(path: Path) -> None:
-    """Git nesneleri Windows'ta salt-okunur olduğu için silmeden önce izinleri açar."""
+    """Git nesneleri salt-okunur olabileceği için silmeden önce izinleri açar."""
     for item in [path, *path.rglob("*")]:
         try:
-            os.chmod(item, stat.S_IWRITE)
+            item.chmod(item.stat().st_mode | stat.S_IRWXU)
         except OSError:
             pass
     shutil.rmtree(path)

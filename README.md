@@ -246,6 +246,34 @@ result = audit_contract_clause(
 print(result["snapshot_commit"], result["findings"])
 ```
 
+## Örnek Çıktı
+
+```text
+$ uv run kktc-law --repo-path corpus_repo laws --as-of 2025-01-01
+anayasa    1985-05-05  Kuzey Kıbrıs Türk Cumhuriyeti Anayasası
+fasil-113  1951-02-16  Şirketler
+fasil-154  1960-08-16  Ceza Yasası
+...
+```
+
+```text
+$ uv run kktc-law --repo-path corpus_repo stats
+Toplam yasa        : 50
+Toplam madde       : 1960
+Aktif madde        : 1949
+Mülga madde        : 11
+Tarihsel commit    : 346
+Tarih aralığı      : 1899-06-02 → 2026-01-01
+Yasa türleri       : anayasa 1, fasil 44, yasa 5
+```
+
+```text
+$ uv run kktc-law --repo-path corpus_repo read fasil-113 2 --as-of 2020-01-01
+# Madde 2: Tefsir
+
+Bu Yasada, metin başka türlü gerektirmedikçe ...
+```
+
 ## Parser Kullanımı
 
 ```python
