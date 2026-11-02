@@ -17,6 +17,7 @@ from typing import Annotated, NoReturn
 import typer
 
 from tools.changelog import collect_changes, collect_commit_log
+from tools.dashboard import build_dashboard
 from tools.git_engine import DeterministicGitEngine, GitEngineError, is_repealed_text
 from tools.models import LawMetadata, SearchHit, normalize_article_id
 from tools.stats import render_stats_markdown, statistics_from_engine
@@ -259,6 +260,26 @@ def stats(ctx: typer.Context) -> None:
         _emit_json(statistics.model_dump(mode="json"))
         return
     typer.echo(render_stats_markdown(statistics), nl=False)
+
+
+@app.command()
+def dashboard(
+    ctx: typer.Context,
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="Dashboard HTML çıktı dizini."),
+    ] = Path("dashboard"),
+) -> None:
+    """Git snapshot'ından statik HTML istatistik/görselleştirme panosu üretir."""
+    state = _state(ctx)
+    try:
+        target = build_dashboard(state.engine, output)
+    except (GitEngineError, ValueError, OSError) as exc:
+        _fail(str(exc))
+    if state.json_output:
+        _emit_json({"dashboard": str(target)})
+        return
+    typer.echo(f"Dashboard üretildi: {target}")
 
 
 @app.command()

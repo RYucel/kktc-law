@@ -63,6 +63,8 @@ uv run pytest -q
 - `data/amendment_patches.json` — isteğe bağlı gerçek metin yamaları.
 - `tools/changelog.py` — tarih/yasa filtreli commit günlüğü (`log`) ve iki tarih arasındaki
   eklenen/değişen/silinen madde-metadata değişikliklerini (`changes`) üretir.
+- `tools/dashboard.py` — Git snapshot'ından dış servis gerektirmeyen statik HTML dashboard
+  (özet kartları, SVG/CSS grafikleri, yasa tablosu, commit akışı) üretir.
 - `tools/semantic_index.py` — Git snapshot'ından kurulan yerel SQLite FTS5/BM25 indeksi;
   dış vektör servisi gerektirmeyen deterministik semantik arama.
 - `tools/ultra_vires.py` — normlar hiyerarşisi, atıf çözümleme, mülga atıf ve yetki aşımı
@@ -107,12 +109,16 @@ uv run kktc-law --json stats
 uv run kktc-law log --law fasil-113 --since 1980-01-01 --until 2000-01-01
 uv run kktc-law changes --since 1980-01-01 --until 2000-01-01 --law fasil-113
 
+# Statik görsel dashboard
+uv run kktc-law dashboard --output dashboard
+
 # JSON çıktısı ve açık repo yolu
 uv run kktc-law --repo-path corpus_repo --json laws
 ```
 
 `changes`, hem gerçek dosya farklarını hem de yalnızca `metadata.json` üzerinden işaretlenen
-mantıksal madde güncellemelerini listeler.
+mantıksal madde güncellemelerini listeler. `dashboard/index.html` dış servis gerektirmez;
+`Deploy dashboard` workflow'u bu klasörü GitHub Pages'e yayınlar.
 
 `read`, mülga görünen maddelerde metni yine yazdırır ancak stderr'e uyarı verir; bulunamayan
 madde veya yasa için sıfırdan farklı çıkış kodu döner.

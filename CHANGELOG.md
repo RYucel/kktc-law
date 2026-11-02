@@ -11,6 +11,8 @@ Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar
 - `kktc-law changes` — iki tarih arasındaki eklenen/değişen/silinen madde ve metadata
   değişiklikleri; hibrit replay'de yalnızca metadata'da işaretlenen maddeler de gösterilir.
 - MCP `get_commit_log` ve `get_corpus_changes` araçları.
+- `kktc-law dashboard` — dış servis gerektirmeyen statik HTML dashboard (özet kartları,
+  CSS/SVG grafikler, yasa arama tablosu, commit akışı) ve GitHub Pages deploy workflow'u.
 
 ## [0.1.0] - 2026-11-02
 

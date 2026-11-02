@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kktc-law · KKTC Mevzuat Külliyatı</title>
+<style>
+:root {
+  --ink:#0f172a; --muted:#64748b; --bg:#f4f7fb; --card:#ffffff;
+  --line:#e2e8f0; --accent:#0ea5a4; --blue:#2563eb; --gold:#f59e0b;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+a { color:var(--blue); text-decoration:none; }
+header { background:linear-gradient(120deg,#0f172a 0%,#134e4a 65%,#0d9488 100%);
+  color:#f8fafc; padding:42px clamp(18px,4vw,64px) 34px; }
+header .eyebrow { color:#99f6e4; text-transform:uppercase; letter-spacing:.18em;
+  font-size:12px; font-weight:700; }
+h1 { margin:8px 0 10px; font-size:clamp(30px,4vw,52px); line-height:1.05; }
+header p { max-width:780px; color:#cbd5e1; margin:0; }
+header code { color:#99f6e4; background:rgba(255,255,255,.1); padding:2px 6px;
+  border-radius:5px; }
+main { max-width:1280px; margin:0 auto; padding:26px clamp(14px,3vw,34px) 60px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px; margin-top:-48px; position:relative; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:18px; box-shadow:0 8px 22px rgba(15,23,42,.06); }
+.card .k { color:var(--muted); font-size:12px; text-transform:uppercase;
+  letter-spacing:.08em; font-weight:700; }
+.card .v { font-size:30px; font-weight:800; margin-top:5px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:18px; margin-top:18px; }
+.panel { background:var(--card); border:1px solid var(--line); border-radius:14px;
+  padding:20px; box-shadow:0 8px 22px rgba(15,23,42,.04); }
+.panel h2 { font-size:17px; margin:0 0 14px; }
+.panel h2 span { color:var(--muted); font-weight:500; font-size:13px; }
+.muted { color:var(--muted); }
+.donut-wrap { display:flex; align-items:center; gap:24px; flex-wrap:wrap; }
+.donut { width:150px; height:150px; border-radius:50%; position:relative; }
+.donut-hole { position:absolute; inset:28px; background:var(--card); border-radius:50%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.donut-hole strong { font-size:28px; } .donut-hole span { color:var(--muted); font-size:11px; }
+.legend { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+.legend li { display:flex; align-items:center; gap:8px; color:var(--muted); }
+.dot { width:10px; height:10px; border-radius:3px; display:inline-block; }
+.bar-row { display:grid; grid-template-columns:170px 1fr 36px; gap:8px;
+  align-items:center; margin:8px 0; font-size:13px; }
+.bar-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#334155; }
+.bar-track { background:#eef2f7; border-radius:99px; height:10px; overflow:hidden; }
+.bar-fill { display:block; height:100%; border-radius:99px; }
+.bar-value { text-align:right; color:var(--muted); font-variant-numeric:tabular-nums; }
+.timeline { display:flex; align-items:flex-end; gap:5px; min-height:150px;
+  overflow-x:auto; padding-top:10px; }
+.timeline-bar { display:flex; flex-direction:column; align-items:center; gap:5px;
+  min-width:26px; justify-content:flex-end; }
+.timeline-bar span { width:18px; background:linear-gradient(180deg,#0ea5a4,#0f766e);
+  border-radius:4px 4px 1px 1px; display:block; }
+.timeline-bar small { color:var(--muted); font-size:10px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase;
+  letter-spacing:.06em; border-bottom:1px solid var(--line); padding:8px; }
+td { border-bottom:1px solid #f1f5f9; padding:8px; vertical-align:top; }
+tr:hover td { background:#f8fafc; }
+.num { text-align:right; font-variant-numeric:tabular-nums; }
+.badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:11px;
+  font-weight:700; color:#fff; }
+.badge-anayasa { background:#0ea5a4; } .badge-fasil { background:#2563eb; }
+.badge-yasa { background:#d97706; }
+.toolbar { display:flex; justify-content:space-between; gap:12px; align-items:center;
+  margin-bottom:10px; flex-wrap:wrap; }
+input[type=search] { border:1px solid var(--line); border-radius:9px; padding:9px 12px;
+  min-width:260px; font:inherit; background:#fff; }
+.table-wrap { max-height:560px; overflow:auto; }
+footer { color:var(--muted); font-size:12px; text-align:center; padding:24px; }
+@media (max-width:600px) { .bar-row { grid-template-columns:110px 1fr 30px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">TurkLex · deterministic law corpus</div>
+  <h1>KKTC Mevzuat Külliyatı</h1>
+  <p>Her yasa bir Git ağacı, her yürürlük olayı bir commit. Görünüm
+  <code>9454dad8bb4a</code> snapshot'ından üretildi; tarih aralığı
+  <strong>1899-06-02</strong> –
+  <strong>2026-01-01</strong>.</p>
+</header>
+<main>
+  <section class="cards">
+    <div class="card"><div class="k">Yasa</div><div class="v">50</div></div>
+    <div class="card"><div class="k">Madde</div><div class="v">1960</div></div>
+    <div class="card"><div class="k">Aktif madde</div>
+      <div class="v">1949</div></div>
+    <div class="card"><div class="k">Mülga</div><div class="v">11</div></div>
+    <div class="card"><div class="k">Commit</div><div class="v">346</div></div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Yasa türleri <span>norm dağılımı</span></h2>
+      <div class="donut-wrap"><div class="donut" style="background:conic-gradient(#0ea5a4 0.00% 2.00%, #2563eb 2.00% 90.00%, #f59e0b 90.00% 100.00%"><div class="donut-hole"><strong>50</strong><span>yasa</span></div></div><ul class="legend"><li><span class="dot" style="background:#0ea5a4"></span>anayasa <strong>1</strong></li><li><span class="dot" style="background:#2563eb"></span>fasil <strong>44</strong></li><li><span class="dot" style="background:#f59e0b"></span>yasa <strong>5</strong></li></ul></div>
+    </section>
+    <section class="panel">
+      <h2>Tarih kaynakları <span>metadata.date_source</span></h2>
+      <div class="bar-row"><span class="bar-label">explicit</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:#0ea5a4"></span></span><span class="bar-value">38</span></div><div class="bar-row"><span class="bar-label">override</span><span class="bar-track"><span class="bar-fill" style="width:3%;background:#0ea5a4"></span></span><span class="bar-value">1</span></div><div class="bar-row"><span class="bar-label">fallback_1959</span><span class="bar-track"><span class="bar-fill" style="width:24%;background:#0ea5a4"></span></span><span class="bar-value">9</span></div><div class="bar-row"><span class="bar-label">fallback_law_year</span><span class="bar-track"><span class="bar-fill" style="width:5%;background:#0ea5a4"></span></span><span class="bar-value">2</span></div>
+    </section>
+    <section class="panel" style="grid-column:span 2">
+      <h2>Yürürlük zaman çizelgesi <span>on yıllara göre commit</span></h2>
+      <div class="timeline"><div class="timeline-bar" title="1890s: 1 commit"><span style="height:5px"></span><small>90s</small></div><div class="timeline-bar" title="1900s: 1 commit"><span style="height:5px"></span><small>00s</small></div><div class="timeline-bar" title="1910s: 3 commit"><span style="height:6px"></span><small>10s</small></div><div class="timeline-bar" title="1920s: 8 commit"><span style="height:16px"></span><small>20s</small></div><div class="timeline-bar" title="1930s: 10 commit"><span style="height:20px"></span><small>30s</small></div><div class="timeline-bar" title="1940s: 14 commit"><span style="height:28px"></span><small>40s</small></div><div class="timeline-bar" title="1950s: 53 commit"><span style="height:106px"></span><small>50s</small></div><div class="timeline-bar" title="1960s: 20 commit"><span style="height:40px"></span><small>60s</small></div><div class="timeline-bar" title="1970s: 41 commit"><span style="height:82px"></span><small>70s</small></div><div class="timeline-bar" title="1980s: 65 commit"><span style="height:130px"></span><small>80s</small></div><div class="timeline-bar" title="1990s: 54 commit"><span style="height:108px"></span><small>90s</small></div><div class="timeline-bar" title="2000s: 28 commit"><span style="height:56px"></span><small>00s</small></div><div class="timeline-bar" title="2010s: 19 commit"><span style="height:38px"></span><small>10s</small></div><div class="timeline-bar" title="2020s: 29 commit"><span style="height:58px"></span><small>20s</small></div></div>
+    </section>
+    <section class="panel" style="grid-column:span 2">
+      <h2>En çok değişen yasalar <span>değişiklik kaydı</span></h2>
+      <div class="bar-row"><span class="bar-label">fasil-144 · Alkollü İçkiler Satış Yasası</span><span class="bar-track"><span class="bar-fill" style="width:100%;background:#2563eb"></span></span><span class="bar-value">38</span></div><div class="bar-row"><span class="bar-label">fasil-154 · CEZA Yasası (3/1962, 43/1963, 15/1972,</span><span class="bar-track"><span class="bar-fill" style="width:89%;background:#2563eb"></span></span><span class="bar-value">34</span></div><div class="bar-row"><span class="bar-label">fasil-114 · fasil-114</span><span class="bar-track"><span class="bar-fill" style="width:84%;background:#2563eb"></span></span><span class="bar-value">32</span></div><div class="bar-row"><span class="bar-label">fasil-105 · Yabancılar VE Muhaceret Yasası (21/198</span><span class="bar-track"><span class="bar-fill" style="width:71%;background:#2563eb"></span></span><span class="bar-value">27</span></div><div class="bar-row"><span class="bar-label">fasil-148 · Haksız Fiiller</span><span class="bar-track"><span class="bar-fill" style="width:66%;background:#2563eb"></span></span><span class="bar-value">25</span></div><div class="bar-row"><span class="bar-label">fasil-138 · Oteller Yasası</span><span class="bar-track"><span class="bar-fill" style="width:58%;background:#2563eb"></span></span><span class="bar-value">22</span></div><div class="bar-row"><span class="bar-label">fasil-1 · Yorum</span><span class="bar-track"><span class="bar-fill" style="width:39%;background:#2563eb"></span></span><span class="bar-value">15</span></div><div class="bar-row"><span class="bar-label">fasil-113 · Şirketler</span><span class="bar-track"><span class="bar-fill" style="width:32%;background:#2563eb"></span></span><span class="bar-value">12</span></div><div class="bar-row"><span class="bar-label">fasil-149 · Sözleşmeler Yasası</span><span class="bar-track"><span class="bar-fill" style="width:26%;background:#2563eb"></span></span><span class="bar-value">10</span></div><div class="bar-row"><span class="bar-label">fasil-15 · Davalarda Zamanaşımı Yasası</span><span class="bar-track"><span class="bar-fill" style="width:21%;background:#2563eb"></span></span><span class="bar-value">8</span></div>
+    </section>
+    <section class="panel">
+      <h2>En çok değişen maddeler</h2>
+      <div class="table-wrap">
+        <table><thead><tr><th>Yasa</th><th>Madde</th><th>Başlık</th>
+        <th class="num">#</th></tr></thead>
+        <tbody><tr><td><code>fasil-114</code></td><td><code>madde-003</code></td><td>KAYIT Mukayyidin Atanması, Görev ve Yetkileri</td><td class="num">23</td></tr><tr><td><code>fasil-154</code></td><td><code>madde-215</code></td><td>madde-215</td><td class="num">19</td></tr><tr><td><code>fasil-144</code></td><td><code>madde-500</code></td><td>000.-TL’sı ile</td><td class="num">17</td></tr><tr><td><code>fasil-105</code></td><td><code>gecici-madde-001</code></td><td>gecici-madde-001</td><td class="num">16</td></tr><tr><td><code>fasil-1</code></td><td><code>madde-002</code></td><td>Bu Yasada ve bu</td><td class="num">14</td></tr><tr><td><code>fasil-144</code></td><td><code>madde-003</code></td><td>madde-003</td><td class="num">13</td></tr><tr><td><code>fasil-105</code></td><td><code>madde-003</code></td><td>madde-003</td><td class="num">11</td></tr><tr><td><code>fasil-138</code></td><td><code>madde-015</code></td><td>madde-015</td><td class="num">11</td></tr><tr><td><code>fasil-148</code></td><td><code>madde-002</code></td><td>Yorum I. KISIM BAŞLANGIÇ KURALLARI</td><td class="num">10</td></tr><tr><td><code>fasil-105</code></td><td><code>madde-005</code></td><td>madde-005</td><td class="num">9</td></tr></tbody></table>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top:18px">
+    <div class="toolbar">
+      <h2 style="margin:0">Yasalar <span>50 kayıt</span></h2>
+      <input id="law-search" type="search" placeholder="Yasa kimliği veya başlıkta ara…">
+    </div>
+    <div class="table-wrap">
+      <table id="law-table">
+        <thead><tr><th>Kimlik</th><th>Tür</th><th>Başlık</th><th>İlk yürürlük</th>
+        <th>Kaynak</th><th class="num">Değişiklik</th></tr></thead>
+        <tbody><tr data-search="anayasa kuzey kıbrıs türk cumhuriyeti anayasası"><td><code>anayasa</code></td><td><span class="badge badge-anayasa">anayasa</span></td><td>Kuzey Kıbrıs Türk Cumhuriyeti Anayasası</td><td>1985-05-05</td><td>override</td><td class="num">0</td></tr><tr data-search="fasil-1 yorum"><td><code>fasil-1</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Yorum</td><td>1959-01-01</td><td>fallback_1959</td><td class="num">15</td></tr><tr data-search="fasil-10 yabancı mahkeme kararları"><td><code>fasil-10</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Yabancı Mahkeme Kararları</td><td>1921-05-27</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-100 ağaç dikilmesi (köy"><td><code>fasil-100</code></td><td><span class="badge badge-fasil">fasil</span></td><td>AĞAÇ Dikilmesi (KÖY</td><td>1948-01-22</td><td>explicit</td><td class="num">2</td></tr><tr data-search="fasil-101 tefecilik (çiftçiler) yasası"><td><code>fasil-101</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Tefecilik (çiftçiler) Yasası</td><td>1919-04-29</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-105 yabancılar ve muhaceret yasası (21/1982; 44/1989, 32/2004, 38/2006, 28/2007; 50/2007; 31/2008; 55/2011; 62/2014; 44/2016, 58/2018, 39/2019, 18/2021, 25/2022, 61/2024, 27/2026 ve 44/2026 sayılı değişiklik yasaları i̇le değiştirilmiş ve birleştirilmiş şekliyle)"><td><code>fasil-105</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Yabancılar VE Muhaceret Yasası (21/1982; 44/1989, 32/2004, 38/2006, 28/2007; 50/2007; 31/2008; 55/2011; 62/2014; 44/2016, 58/2018, 39/2019, 18/2021, 25/2022, 61/2024, 27/2026 Ve 44/2026 Sayılı Değişiklik Yasaları İle Değiştirilmiş Ve Birleştirilmiş Şekliyle)</td><td>1914-11-05</td><td>explicit</td><td class="num">27</td></tr><tr data-search="fasil-107 yurt dışına çıkışları (düzenleme)"><td><code>fasil-107</code></td><td><span class="badge badge-fasil">fasil</span></td><td>YURT Dışına Çıkışları (düzenleme)</td><td>1948-02-07</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-110 misyonerler (yabancılar düzenleme)"><td><code>fasil-110</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Misyonerler (yabancılar Düzenleme)</td><td>1922-05-13</td><td>explicit</td><td class="num">5</td></tr><tr data-search="fasil-113 şirketler"><td><code>fasil-113</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Şirketler</td><td>1951-02-16</td><td>explicit</td><td class="num">12</td></tr><tr data-search="fasil-114 fasil-114"><td><code>fasil-114</code></td><td><span class="badge badge-fasil">fasil</span></td><td>fasil-114</td><td>1923-05-12</td><td>explicit</td><td class="num">32</td></tr><tr data-search="fasil-115 fasil-115"><td><code>fasil-115</code></td><td><span class="badge badge-fasil">fasil</span></td><td>fasil-115</td><td>1949-08-22</td><td>explicit</td><td class="num">4</td></tr><tr data-search="fasil-116 kollektif ve komandit şirketler ve ticari"><td><code>fasil-116</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Kollektif Ve Komandit Şirketler Ve Ticari</td><td>1928-05-12</td><td>explicit</td><td class="num">4</td></tr><tr data-search="fasil-12 yabancı mahkemeler (şahadet)"><td><code>fasil-12</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Yabancı Mahkemeler (şahadet)</td><td>1908-06-03</td><td>explicit</td><td class="num">2</td></tr><tr data-search="fasil-122 ziraat bankası* (özel i̇mtiyazlar)"><td><code>fasil-122</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Ziraat Bankası* (ÖZEL İmtiyazlar)</td><td>1939-03-17</td><td>explicit</td><td class="num">3</td></tr><tr data-search="fasil-123 banka tatilleri yasası"><td><code>fasil-123</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Banka Tatilleri Yasası</td><td>1928-05-12</td><td>explicit</td><td class="num">4</td></tr><tr data-search="fasil-126 düşük fiyatla"><td><code>fasil-126</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Düşük Fiyatla</td><td>1955-09-30</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-127 kıbrıs şaraplarının"><td><code>fasil-127</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Kıbrıs Şaraplarının</td><td>1950-01-17</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-128 amyantın"><td><code>fasil-128</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Amyantın</td><td>1949-01-01</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-130 çimento sanayii"><td><code>fasil-130</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Çimento Sanayii</td><td>1952-01-01</td><td>fallback_1959</td><td class="num">3</td></tr><tr data-search="fasil-131 narenciyeciliğe"><td><code>fasil-131</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Narenciyeciliğe</td><td>1941-05-14</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-132 tüccarlarla"><td><code>fasil-132</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Tüccarlarla</td><td>1919-04-29</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-138 oteller yasası"><td><code>fasil-138</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Oteller Yasası</td><td>1935-10-01</td><td>explicit</td><td class="num">22</td></tr><tr data-search="fasil-139 (19/1992)"><td><code>fasil-139</code></td><td><span class="badge badge-fasil">fasil</span></td><td>(19/1992)</td><td>1938-05-27</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-141 mermer i̇malatı"><td><code>fasil-141</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Mermer İmalatı</td><td>1935-06-14</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-144 alkollü i̇çkiler satış yasası"><td><code>fasil-144</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Alkollü İçkiler Satış Yasası</td><td>1943-11-11</td><td>explicit</td><td class="num">38</td></tr><tr data-search="fasil-145 i̇pek böceği"><td><code>fasil-145</code></td><td><span class="badge badge-fasil">fasil</span></td><td>İPEK Böceği</td><td>1922-05-13</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-148 haksız fiiller"><td><code>fasil-148</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Haksız Fiiller</td><td>1933-01-01</td><td>explicit</td><td class="num">25</td></tr><tr data-search="fasil-149 sözleşmeler yasası"><td><code>fasil-149</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Sözleşmeler Yasası</td><td>1953-01-01</td><td>fallback_1959</td><td class="num">10</td></tr><tr data-search="fasil-15 davalarda zamanaşımı yasası"><td><code>fasil-15</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Davalarda Zamanaşımı Yasası</td><td>1945-09-27</td><td>explicit</td><td class="num">8</td></tr><tr data-search="fasil-152 fasil-152"><td><code>fasil-152</code></td><td><span class="badge badge-fasil">fasil</span></td><td>fasil-152</td><td>1936-08-14</td><td>explicit</td><td class="num">5</td></tr><tr data-search="fasil-153 ölüm sorgu yargıçları"><td><code>fasil-153</code></td><td><span class="badge badge-fasil">fasil</span></td><td>ÖLÜM Sorgu Yargıçları</td><td>1953-01-01</td><td>fallback_1959</td><td class="num">8</td></tr><tr data-search="fasil-154 ceza yasası (3/1962, 43/1963, 15/1972, 20/1974, 31/1975, 6/1983, 22/1989, 64/1989, 11/1997, 20/2004, 41/2007, 20/2014, 45/2014, 26/2018, 14/2020, 65/2024, 17/2025 ve 24/2026 sayılı değişiklik yasaları i̇le birleştirilmiş şekli)"><td><code>fasil-154</code></td><td><span class="badge badge-fasil">fasil</span></td><td>CEZA Yasası (3/1962, 43/1963, 15/1972, 20/1974, 31/1975, 6/1983, 22/1989, 64/1989, 11/1997, 20/2004, 41/2007, 20/2014, 45/2014, 26/2018, 14/2020, 65/2024, 17/2025 Ve 24/2026 Sayılı Değişiklik Yasaları İle Birleştirilmiş Şekli)</td><td>1960-08-16</td><td>explicit</td><td class="num">34</td></tr><tr data-search="fasil-155 ceza muhakemeleri"><td><code>fasil-155</code></td><td><span class="badge badge-fasil">fasil</span></td><td>CEZA Muhakemeleri</td><td>1959-01-01</td><td>fallback_1959</td><td class="num">6</td></tr><tr data-search="fasil-156 sokağa"><td><code>fasil-156</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Sokağa</td><td>1955-05-02</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-157 çocuk suçluları"><td><code>fasil-157</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Çocuk Suçluları</td><td>1954-01-01</td><td>fallback_1959</td><td class="num">5</td></tr><tr data-search="fasil-158 rahatsızlıklar (genelevler) yasası"><td><code>fasil-158</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Rahatsızlıklar (genelevler) Yasası</td><td>1899-06-02</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-159 saldırı silahları"><td><code>fasil-159</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Saldırı Silahları</td><td>1955-11-24</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-160 huzur ve düzen"><td><code>fasil-160</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Huzur VE Düzen</td><td>1951-02-20</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-161 yolsuzlukların"><td><code>fasil-161</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Yolsuzlukların</td><td>1920-05-04</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-162 suçluların gözetim altında bulundurulması suçluların gözetim altında bulundurulmasını öngören yasa"><td><code>fasil-162</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Suçluların Gözetim Altında Bulundurulması Suçluların Gözetim Altında Bulundurulmasını Öngören YASA</td><td>1952-03-14</td><td>explicit</td><td class="num">0</td></tr><tr data-search="fasil-163 devlete ai̇t mallar (çalma ve tasarruf) yasası"><td><code>fasil-163</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Devlete AİT Mallar (çalma VE Tasarruf) Yasası</td><td>1946-02-24</td><td>explicit</td><td class="num">1</td></tr><tr data-search="fasil-164 müfsidane yayınlar"><td><code>fasil-164</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Müfsidane Yayınlar</td><td>1921-04-13</td><td>explicit</td><td class="num">4</td></tr><tr data-search="fasil-3 avukat kâtipleri"><td><code>fasil-3</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Avukat Kâtipleri</td><td>1959-01-01</td><td>fallback_1959</td><td class="num">0</td></tr><tr data-search="fasil-4 tahkim"><td><code>fasil-4</code></td><td><span class="badge badge-fasil">fasil</span></td><td>Tahkim</td><td>1959-01-01</td><td>fallback_1959</td><td class="num">1</td></tr><tr data-search="fasil-5 i̇flas yasası"><td><code>fasil-5</code></td><td><span class="badge badge-fasil">fasil</span></td><td>İflas Yasası</td><td>1959-01-01</td><td>fallback_1959</td><td class="num">0</td></tr><tr data-search="yasa-2020-31 tüketici kredileri yasası i̇çdüzeni"><td><code>yasa-2020-31</code></td><td><span class="badge badge-yasa">yasa</span></td><td>Tüketici Kredileri Yasası İçdüzeni</td><td>2020-06-29</td><td>explicit</td><td class="num">1</td></tr><tr data-search="yasa-2022-10 yol güvenliği yasası"><td><code>yasa-2022-10</code></td><td><span class="badge badge-yasa">yasa</span></td><td>YOL Güvenliği Yasası</td><td>2022-06-27</td><td>explicit</td><td class="num">2</td></tr><tr data-search="yasa-2023-38 sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni"><td><code>yasa-2023-38</code></td><td><span class="badge badge-yasa">yasa</span></td><td>Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni</td><td>2023-06-26</td><td>explicit</td><td class="num">0</td></tr><tr data-search="yasa-2024-49 başbakanlık ve merkez kuruluşu"><td><code>yasa-2024-49</code></td><td><span class="badge badge-yasa">yasa</span></td><td>Başbakanlık VE Merkez Kuruluşu</td><td>2024-01-01</td><td>fallback_law_year</td><td class="num">5</td></tr><tr data-search="yasa-2024-53 kimyasallar yasası"><td><code>yasa-2024-53</code></td><td><span class="badge badge-yasa">yasa</span></td><td>Kimyasallar Yasası</td><td>2024-01-01</td><td>fallback_law_year</td><td class="num">1</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Son commit'ler <span>en yeni 25</span></h2>
+    <div class="table-wrap">
+      <table><thead><tr><th>Tarih</th><th>Commit</th><th>Yasa</th><th>Konu</th></tr></thead>
+      <tbody><tr><td>2026-01-01</td><td><code>9454dad8</code></td><td>fasil-155</td><td>fasil-155: 2026-01-01 — 32/2026 (madde-001, madde-160, madde-174, madde-175, madde-176)</td></tr><tr><td>2026-01-01</td><td><code>1a443147</code></td><td>fasil-154</td><td>fasil-154: 2026-01-01 — 24/2026 (madde-113)</td></tr><tr><td>2026-01-01</td><td><code>72d72a12</code></td><td>fasil-138</td><td>fasil-138: 2026-01-01 — 14/2026 (madde-001, madde-011, madde-012)</td></tr><tr><td>2026-01-01</td><td><code>c72f53c6</code></td><td>fasil-105</td><td>fasil-105: 2026-01-01 — 44/2026 (madde-003, madde-005)</td></tr><tr><td>2026-01-01</td><td><code>d7b17a67</code></td><td>fasil-105</td><td>fasil-105: 2026-01-01 — 27/2026 (gecici-madde-001)</td></tr><tr><td>2025-01-01</td><td><code>0aa0b847</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2025-01-01 — 9/2025 (madde-021)</td></tr><tr><td>2025-01-01</td><td><code>4d85f63e</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2025-01-01 — 14/2025 (madde-013)</td></tr><tr><td>2025-01-01</td><td><code>6934ff0e</code></td><td>fasil-154</td><td>fasil-154: 2025-01-01 — 17/2025 (madde-001, madde-002, madde-003, madde-171, madde-215, madde-311)</td></tr><tr><td>2025-01-01</td><td><code>9bfdd7ae</code></td><td>fasil-105</td><td>fasil-105: 2025-01-01 — 25/2025 (gecici-madde-001)</td></tr><tr><td>2024-01-01</td><td><code>ec71bb7b</code></td><td>yasa-2024-53</td><td>yasa-2024-53: 2024-01-01 — 53/2024 (madde-042)</td></tr><tr><td>2024-01-01</td><td><code>0fd704bd</code></td><td>yasa-2024-53</td><td>yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</td></tr><tr><td>2024-01-01</td><td><code>605a6a4d</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 9/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>a25d6eab</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 5/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>ea51a409</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 49/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>8ffc9776</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 28/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>f6e3c6dc</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</td></tr><tr><td>2024-01-01</td><td><code>b1321b0f</code></td><td>fasil-154</td><td>fasil-154: 2024-01-01 — 65/2024 (madde-207)</td></tr><tr><td>2024-01-01</td><td><code>689c8dc6</code></td><td>fasil-149</td><td>fasil-149: 2024-01-01 — 41/2024 (madde-010)</td></tr><tr><td>2024-01-01</td><td><code>83c4b572</code></td><td>fasil-105</td><td>fasil-105: 2024-01-01 — 61/2024 (gecici-madde-001, gecici-madde-025, madde-003)</td></tr><tr><td>2023-06-26</td><td><code>efcc7fdd</code></td><td>yasa-2023-38</td><td>yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</td></tr><tr><td>2022-06-27</td><td><code>159a66ef</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2022-06-27 — 10/2022 (madde-013)</td></tr><tr><td>2022-06-27</td><td><code>9643c62f</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</td></tr><tr><td>2022-01-01</td><td><code>0e6d56ef</code></td><td>fasil-105</td><td>fasil-105: 2022-01-01 — 25/2022 (gecici-madde-001)</td></tr><tr><td>2021-01-01</td><td><code>64e1fb57</code></td><td>fasil-105</td><td>fasil-105: 2021-01-01 — 18/2021 (gecici-madde-001, gecici-madde-025)</td></tr><tr><td>2020-06-29</td><td><code>447a1efb</code></td><td>yasa-2020-31</td><td>yasa-2020-31: 2020-06-29 — 31/2020 (madde-026)</td></tr></tbody></table>
+    </div>
+  </section>
+</main>
+<footer>kktc-law · deterministik Git külliyatı · bu sayfa dış servis kullanmaz</footer>
+<script>
+const search = document.getElementById('law-search');
+search.addEventListener('input', () => {
+  const q = search.value.toLocaleLowerCase('tr');
+  document.querySelectorAll('#law-table tbody tr').forEach(row => {
+    row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

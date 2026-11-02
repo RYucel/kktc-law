@@ -83,6 +83,9 @@ jobs:
       - name: Report corpus statistics
         run: uv run kktc-law --repo-path corpus_repo stats
 
+      - name: Generate static dashboard
+        run: uv run kktc-law --repo-path corpus_repo dashboard --output dashboard
+
       - name: Upload statistics artifact
         uses: actions/upload-artifact@v4
         with:
@@ -90,3 +93,4 @@ jobs:
           path: |
             corpus_repo/STATS.md
             raw_cache/manifest.json
+            dashboard/index.html
