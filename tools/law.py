@@ -16,6 +16,7 @@ from typing import Annotated, NoReturn
 
 import typer
 
+from tools.changelog import collect_changes, collect_commit_log
 from tools.git_engine import DeterministicGitEngine, GitEngineError, is_repealed_text
 from tools.models import LawMetadata, SearchHit, normalize_article_id
 from tools.stats import render_stats_markdown, statistics_from_engine
@@ -258,6 +259,89 @@ def stats(ctx: typer.Context) -> None:
         _emit_json(statistics.model_dump(mode="json"))
         return
     typer.echo(render_stats_markdown(statistics), nl=False)
+
+
+@app.command()
+def log(
+    ctx: typer.Context,
+    law_id: Annotated[
+        str | None,
+        typer.Option("--law", help="Yalnızca belirli bir yasanın commit'lerini göster."),
+    ] = None,
+    since: Annotated[
+        str | None,
+        typer.Option("--since", help="Başlangıç yürürlük tarihi (YYYY-MM-DD)."),
+    ] = None,
+    until: Annotated[
+        str | None,
+        typer.Option("--until", help="Bitiş yürürlük tarihi (YYYY-MM-DD)."),
+    ] = None,
+    limit: Annotated[
+        int,
+        typer.Option("--limit", min=1, help="En fazla commit sayısı."),
+    ] = 50,
+) -> None:
+    """Tarihsel commit günlüğünü yürürlük tarihi ve yasa filtresiyle gösterir."""
+    state = _state(ctx)
+    try:
+        entries = collect_commit_log(
+            state.engine,
+            law_id=law_id,
+            since=since,
+            until=until,
+            limit=limit,
+        )
+    except (GitEngineError, ValueError) as exc:
+        _fail(str(exc))
+    if state.json_output:
+        _emit_json([entry.model_dump(mode="json") for entry in entries])
+        return
+    if not entries:
+        typer.echo("Commit bulunamadı.")
+        return
+    for entry in entries:
+        typer.echo(
+            f"{entry.effective_date}\t{entry.commit_sha[:8]}\t"
+            f"{entry.subject}\t({entry.author_name})"
+        )
+
+
+@app.command()
+def changes(
+    ctx: typer.Context,
+    since: Annotated[
+        str,
+        typer.Option("--since", help="Başlangıç yürürlük tarihi (YYYY-MM-DD)."),
+    ],
+    until: Annotated[
+        str | None,
+        typer.Option("--until", help="Bitiş yürürlük tarihi; boşsa HEAD."),
+    ] = None,
+    law_id: Annotated[
+        str | None,
+        typer.Option("--law", help="Yalnızca belirli bir yasanın değişikliklerini göster."),
+    ] = None,
+) -> None:
+    """İki tarih arasında eklenen/değişen/silinen madde ve metadata dosyalarını gösterir."""
+    state = _state(ctx)
+    try:
+        items = collect_changes(
+            state.engine,
+            since=since,
+            until=until,
+            law_id=law_id,
+        )
+    except (GitEngineError, ValueError) as exc:
+        _fail(str(exc), code=2)
+    if state.json_output:
+        _emit_json([item.model_dump(mode="json") for item in items])
+        return
+    if not items:
+        typer.echo("Değişiklik yok.")
+        return
+    for item in items:
+        label = item.article_id or "metadata.json"
+        typer.echo(f"{item.law_id}\t{label}\t{item.status}\t{item.path}")
 
 
 @app.command()

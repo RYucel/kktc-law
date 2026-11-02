@@ -61,6 +61,8 @@ uv run pytest -q
   bu yamaları ilgili tarihte uygulayarak gerçek `git diff` üretir.
 - `data/law_dates_override.json` — doğrulanmış yasa tarihleri; KKTC Anayasası için `1985-05-05`.
 - `data/amendment_patches.json` — isteğe bağlı gerçek metin yamaları.
+- `tools/changelog.py` — tarih/yasa filtreli commit günlüğü (`log`) ve iki tarih arasındaki
+  eklenen/değişen/silinen madde-metadata değişikliklerini (`changes`) üretir.
 - `tools/semantic_index.py` — Git snapshot'ından kurulan yerel SQLite FTS5/BM25 indeksi;
   dış vektör servisi gerektirmeyen deterministik semantik arama.
 - `tools/ultra_vires.py` — normlar hiyerarşisi, atıf çözümleme, mülga atıf ve yetki aşımı
@@ -101,9 +103,16 @@ uv run kktc-law search "veri" --as-of 2025-01-01 --law yasa-2024-42
 uv run kktc-law stats
 uv run kktc-law --json stats
 
+# Commit günlüğü ve tarih aralığındaki değişiklikler
+uv run kktc-law log --law fasil-113 --since 1980-01-01 --until 2000-01-01
+uv run kktc-law changes --since 1980-01-01 --until 2000-01-01 --law fasil-113
+
 # JSON çıktısı ve açık repo yolu
 uv run kktc-law --repo-path corpus_repo --json laws
 ```
+
+`changes`, hem gerçek dosya farklarını hem de yalnızca `metadata.json` üzerinden işaretlenen
+mantıksal madde güncellemelerini listeler.
 
 `read`, mülga görünen maddelerde metni yine yazdırır ancak stderr'e uyarı verir; bulunamayan
 madde veya yasa için sıfırdan farklı çıkış kodu döner.

@@ -23,6 +23,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
 from tools.models import (
+    FileChange,
     LawMetadata,
     SearchHit,
     normalize_article_id,
@@ -779,6 +780,53 @@ class DeterministicGitEngine:
         """Commit mesajının tam gövdesini (trailer dahil) döndürür."""
         result = self._run_git(["show", "-s", "--format=%B", commit_sha])
         return self._decode(result.stdout)
+
+    def commit_subject(self, commit_sha: str = "HEAD") -> str:
+        """Commit mesajının ilk satırını (subject) döndürür."""
+        result = self._run_git(["show", "-s", "--format=%s", commit_sha])
+        return self._decode(result.stdout).strip()
+
+    def commit_author(self, commit_sha: str = "HEAD") -> str:
+        """Commit yazarının adını döndürür."""
+        result = self._run_git(["show", "-s", "--format=%an", commit_sha])
+        return self._decode(result.stdout).strip()
+
+    def changed_files_between(
+        self,
+        from_sha: str,
+        to_sha: str,
+        *,
+        pathspec: str = "laws",
+    ) -> list[FileChange]:
+        """İki commit arasında değişen dosyaları `git diff --name-status` ile döndürür."""
+        if not from_sha or not to_sha:
+            raise ValueError("from_sha ve to_sha boş olamaz")
+        result = self._run_git(
+            [
+                "diff",
+                "--name-status",
+                "--no-renames",
+                "--no-ext-diff",
+                from_sha,
+                to_sha,
+                "--",
+                pathspec,
+            ],
+            allow_failure=True,
+        )
+        if result.returncode != 0:
+            raise GitEngineError(self._decode(result.stderr).strip())
+        changes: list[FileChange] = []
+        for raw_line in self._decode(result.stdout).splitlines():
+            fields = raw_line.split("\t", 1)
+            if len(fields) != 2:
+                continue
+            status_raw, path = fields[0].strip().upper(), fields[1].strip()
+            status = {"A": "added", "M": "modified", "D": "deleted"}.get(status_raw)
+            if status is None:
+                continue
+            changes.append(FileChange(path=path, status=status))
+        return sorted(changes, key=lambda item: (item.path, item.status))
 
     def effective_date(self, commit_sha: str = "HEAD") -> str:
         """Commit'in gerçek yürürlük tarihini (`Effective-Date` trailer'ı) döndürür.

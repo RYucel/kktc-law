@@ -3,6 +3,15 @@
 Bu dosya `kktc-law` projesindeki kullanıcıya dokunan değişiklikleri özetler.
 Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar.
 
+## [Unreleased]
+
+### Eklenenler
+
+- `kktc-law log` — yürürlük tarihi ve yasa filtresiyle commit günlüğü.
+- `kktc-law changes` — iki tarih arasındaki eklenen/değişen/silinen madde ve metadata
+  değişiklikleri; hibrit replay'de yalnızca metadata'da işaretlenen maddeler de gösterilir.
+- MCP `get_commit_log` ve `get_corpus_changes` araçları.
+
 ## [0.1.0] - 2026-11-02
 
 ### Eklenenler

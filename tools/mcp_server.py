@@ -14,6 +14,7 @@ from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from tools.changelog import collect_changes, collect_commit_log
 from tools.git_engine import DeterministicGitEngine, is_repealed_text
 from tools.models import normalize_article_id
 from tools.sentinel import audit_contract_clause as _sentinel_audit
@@ -252,6 +253,44 @@ def turklex_audit(
         _engine(),
         subject_level=subject_level,
     )
+
+
+@mcp.tool()
+def get_commit_log(
+    law_id: str | None = None,
+    since: str | None = None,
+    until: str | None = None,
+    limit: int = 50,
+) -> list[dict[str, Any]]:
+    """Tarihsel commit günlüğünü yürürlük tarihi ve yasa filtresiyle döndürür."""
+    return [
+        entry.model_dump(mode="json")
+        for entry in collect_commit_log(
+            _engine(),
+            law_id=law_id,
+            since=since,
+            until=until,
+            limit=limit,
+        )
+    ]
+
+
+@mcp.tool()
+def get_corpus_changes(
+    since: str,
+    until: str | None = None,
+    law_id: str | None = None,
+) -> list[dict[str, Any]]:
+    """İki tarih arasındaki eklenen/değişen/silinen dosyaları döndürür."""
+    return [
+        item.model_dump(mode="json")
+        for item in collect_changes(
+            _engine(),
+            since=since,
+            until=until,
+            law_id=law_id,
+        )
+    ]
 
 
 def main() -> None:

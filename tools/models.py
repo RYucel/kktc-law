@@ -34,10 +34,13 @@ __all__ = [
     "CachedDocument",
     "CorpusStatistics",
     "DateSource",
+    "FileChange",
     "ArticleAmendmentStat",
     "ArticlePatch",
     "AuditFinding",
     "AuditSource",
+    "CommitLogEntry",
+    "CorpusChange",
     "SemanticHit",
     "UltraViresReport",
     "LawHeader",
@@ -804,6 +807,38 @@ class UltraViresReport(BaseModel):
     subject_level: str
     findings: list[AuditFinding] = Field(default_factory=list)
     sources: list[AuditSource] = Field(default_factory=list)
+
+
+class CommitLogEntry(BaseModel):
+    """Tarihsel külliyat commit'i için özet satır."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    commit_sha: str
+    effective_date: str
+    law_id: str
+    subject: str
+    author_name: str
+
+
+class CorpusChange(BaseModel):
+    """İki tarih arasındaki dosya değişikliği."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    law_id: str
+    article_id: str | None = None
+    status: Literal["eklendi", "güncellendi", "silindi"]
+    path: str
+
+
+class FileChange(BaseModel):
+    """Git diff --name-status çıktısındaki tek dosya değişikliği."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    path: str
+    status: Literal["added", "modified", "deleted"]
 
 
 class CorpusStatistics(BaseModel):
