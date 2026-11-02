@@ -1,0 +1,22 @@
+{
+  "checked_on": "2026-11-02",
+  "history": "replayed",
+  "jurisdiction": "trnc",
+  "label": "KKTC Mevzuatı (Birleştirilmiş Yasalar ve Fasıllar)",
+  "language": [
+    "tr"
+  ],
+  "name": "Turkish Republic of Northern Cyprus",
+  "sources": [
+    {
+      "id": "mahkemeler",
+      "name": "KKTC Mahkemeler Mevzuat Bilgi Sistemi",
+      "url": "https://www.mahkemeler.net"
+    },
+    {
+      "id": "meclis",
+      "name": "KKTC Cumhuriyet Meclisi",
+      "url": "https://www.cm.gov.ct.tr"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+name: CI and Corpus Update
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-lint:
+    name: Test and lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Tests
+        run: uv run pytest -q
+
+  weekly-corpus-sync:
+    name: Weekly live corpus sync
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install LibreOffice Writer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libreoffice-writer
+
+      - name: Install Python dependencies
+        run: uv sync --extra dev
+
+      - name: Fetch updates and build pilot corpus
+        run: |
+          rm -rf corpus_repo corpus_repo_check
+          uv run python -m tools.build_corpus \
+            --repo-path corpus_repo \
+            --from-cache raw_cache \
+            --scrape \
+            --limit 50
+
+      - name: Verify deterministic rebuild
+        run: |
+          uv run python -m tools.build_corpus \
+            --repo-path corpus_repo_check \
+            --from-cache raw_cache \
+            --limit 50
+          test "$(git -C corpus_repo rev-parse HEAD)" = "$(git -C corpus_repo_check rev-parse HEAD)"
+          git -C corpus_repo fsck --no-dangling
+          test -z "$(git -C corpus_repo status --porcelain)"
+
+      - name: Report corpus statistics
+        run: uv run kktc-law --repo-path corpus_repo stats
+
+      - name: Upload statistics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kktc-law-stats
+          path: |
+            corpus_repo/STATS.md
+            raw_cache/manifest.json

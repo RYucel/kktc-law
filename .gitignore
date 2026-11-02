@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Araç çıktıları / külliyat inşası
+raw_cache/
+corpus_repo/
+build/
+dist/
+*.sqlite3
+.coverage
+htmlcov/
+
+# Editör ve işletim sistemi
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,11 @@
+# Satır sonlarını depo içinde LF olarak normalize et
+* text=auto eol=lf
+
+# İkili belge biçimleri (repo'ya girmese de güvenlik için)
+*.doc binary
+*.docx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
