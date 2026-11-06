@@ -3,7 +3,7 @@
 Tüm komutlar Git nesne veritabanından (`git show`, `git log`, `git grep`, `git diff`)
 okur; `git checkout` kullanmaz ve working tree'yi değiştirmez. Zaman çözümlemesi
 `DeterministicGitEngine.resolve_commit_as_of` üzerinden yapılır; 1970 öncesi
-`Effective-Date` trailer'ı tüm komutlarda aynı biçimde uygulanır.
+`In-force` trailer'ı tüm komutlarda aynı biçimde uygulanır.
 """
 
 from __future__ import annotations

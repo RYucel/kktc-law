@@ -299,6 +299,8 @@ def test_end_to_end_fasil_113_is_deterministic(tmp_path: Path) -> None:
                 for path, content in reversed(list(plan.file_changes.items()))
             },
             tag_name=plan.tag_name,
+            law=plan.law,
+            kind=plan.kind,
         )
 
     assert engine_a.head() == engine_b.head()

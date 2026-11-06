@@ -54,6 +54,7 @@ __all__ = [
     "DEFAULT_AMENDMENT_DATES_PATH",
     "load_amendment_dates",
     "merge_commit_plans",
+    "render_corpus_json",
 ]
 
 logger = logging.getLogger(__name__)
@@ -159,6 +160,28 @@ def merge_commit_plans(
     return merged
 
 
+def _checked_on_from(corpus_text: str) -> str:
+    """Kök `corpus.json` metninden `checked_on` tarihini okur; yoksa/geçersizse hata verir."""
+    try:
+        payload = json.loads(corpus_text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"corpus.json geçerli JSON değil: {exc}") from exc
+    raw = payload.get("checked_on") if isinstance(payload, dict) else None
+    if not isinstance(raw, str):
+        raise ValueError("corpus.json içinde 'checked_on' bulunamadı; --cutoff verin")
+    return validate_iso_date(raw)
+
+
+def render_corpus_json(corpus_text: str, *, cutoff: str, has_future_branch: bool) -> str:
+    """Korunan korpus alanlarına `checked_on` ve `has_future_branch` ekler."""
+    payload = json.loads(corpus_text)
+    if not isinstance(payload, dict):
+        raise ValueError("corpus.json bir JSON nesnesi olmalıdır")
+    payload["checked_on"] = validate_iso_date(cutoff)
+    payload["has_future_branch"] = has_future_branch
+    return json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=False) + "\n"
+
+
 def _read_required_text(path: str | os.PathLike[str], label: str) -> str:
     source = Path(path)
     if not source.is_file():
@@ -184,6 +207,7 @@ class CorpusBuilder:
         limit: int | None = None,
         matches: Sequence[str] | None = None,
         strict: bool = False,
+        cutoff: str | None = None,
     ) -> None:
         if limit is not None and limit < 1:
             raise ValueError("limit en az 1 olmalıdır")
@@ -210,6 +234,9 @@ class CorpusBuilder:
         self.corpus_text = _read_required_text(corpus_path or DEFAULT_CORPUS_PATH, "corpus.json")
         self.reproduce_text = _read_required_text(
             reproduce_path or DEFAULT_REPRODUCE_PATH, "REPRODUCE.md"
+        )
+        self.cutoff = (
+            validate_iso_date(cutoff) if cutoff is not None else _checked_on_from(self.corpus_text)
         )
         self.limit = limit
         self.matches = [item.strip() for item in (matches or []) if item.strip()]
@@ -424,14 +451,29 @@ class CorpusBuilder:
         if not merged:
             raise ValueError("Uygulanacak commit planı üretilemedi")
 
+        cutoff = self.cutoff
+        in_force = [plan for plan in merged if plan.effective_date <= cutoff]
+        if not in_force:
+            raise ValueError(f"{cutoff} tarihinde yürürlükte olan hiçbir yasa yok")
+        has_future = len(in_force) < len(merged)
+
+        # Kök commit `main` ve `future` tarafından paylaşılır; bu yüzden istatistikler
+        # yalnızca kesim tarihinde yürürlükte olan planlardan ve yasalardan hesaplanır.
+        stat_laws = [
+            law
+            for law in built_laws
+            if law.header.original_date is None or law.header.original_date <= cutoff
+        ]
         stats = statistics_from_parsed_laws(
-            [law.header for law in built_laws],
-            built_laws,
-            [plan.effective_date for plan in merged],
+            [law.header for law in stat_laws],
+            stat_laws,
+            [plan.effective_date for plan in in_force],
         )
         first = merged[0]
         root_files = dict(first.file_changes)
-        root_files["corpus.json"] = self.corpus_text
+        root_files["corpus.json"] = render_corpus_json(
+            self.corpus_text, cutoff=cutoff, has_future_branch=has_future
+        )
         root_files["REPRODUCE.md"] = self.reproduce_text
         root_files["STATS.md"] = render_stats_markdown(stats)
         merged[0] = first.model_copy(
@@ -451,6 +493,7 @@ class CorpusBuilder:
 
         for plan in merged:
             plan.apply_to(engine)
+        future_sha = engine.finalize_branches(cutoff)
 
         skipped.sort(key=lambda item: (item.law_id, item.reason))
         return BuildSummary(
@@ -458,6 +501,8 @@ class CorpusBuilder:
             article_count=article_count,
             commit_count=len(merged),
             head_sha=engine.head(),
+            cutoff=cutoff,
+            future_sha=future_sha,
             skipped_laws=skipped,
         )
 
@@ -569,6 +614,13 @@ def build(
         Path | None,
         typer.Option("--reproduce", help="Kök REPRODUCE.md dosyası."),
     ] = None,
+    cutoff: Annotated[
+        str | None,
+        typer.Option(
+            "--cutoff",
+            help="Kesim tarihi (YYYY-MM-DD); verilmezse corpus.json 'checked_on' kullanılır.",
+        ),
+    ] = None,
 ) -> None:
     """Kaynaklardan külliyatı inşa eder ve deterministik özeti JSON olarak yazar."""
     if (from_cache is None) == (from_dir is None):
@@ -602,6 +654,12 @@ def build(
         )
         return
 
+    if cutoff is not None:
+        try:
+            cutoff = validate_iso_date(cutoff)
+        except ValueError as exc:
+            raise typer.BadParameter(f"--cutoff geçersiz: {exc}") from exc
+
     builder = CorpusBuilder(
         repo_path,
         amendment_dates_path=amendment_dates,
@@ -612,6 +670,7 @@ def build(
         limit=limit,
         matches=match,
         strict=strict,
+        cutoff=cutoff,
     )
     if from_cache is not None:
         summary = builder.build_from_cache(from_cache)

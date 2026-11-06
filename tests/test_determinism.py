@@ -136,6 +136,8 @@ def _build_repo(
         commit_message="  " + MESSAGE_1951 + "  \r\n",
         file_changes=_initial_files(crlf=crlf, reverse=reverse),
         tag_name="v1951-06-01",
+        law="fasil-113 Şirketler",
+        kind="baseline",
     )
     engine.apply_legislative_commit(
         effective_date=DATE_2018,
@@ -143,6 +145,8 @@ def _build_repo(
         commit_message=MESSAGE_2018,
         file_changes=_amendment_files(crlf=crlf, reverse=reverse),
         tag_name="v2018-09-05",
+        law="41/2018",
+        kind="law",
     )
     return engine
 
@@ -196,13 +200,13 @@ def test_two_repos_produce_identical_hashes(
     assert engine_a.commit_timestamp("HEAD").startswith(f"{DATE_2018}T00:00:00")
 
     body = engine_a.commit_message("HEAD")
-    assert f"Effective-Date: {DATE_2018}" in body
+    assert f"In-force: {DATE_2018}" in body
     assert "Sayılı Değişiklik Yasası" in body
 
     root_body = engine_a.commit_message(first_a)
     assert "Şirketler Yasası" in root_body
     assert "yürürlüğe girdi" in root_body
-    assert f"Effective-Date: {DATE_1951}" in root_body
+    assert f"In-force: {DATE_1951}" in root_body
 
 
 def test_historical_reads_return_correct_version(
@@ -308,12 +312,16 @@ def test_repealed_article_is_deleted_from_working_tree_and_head(tmp_path: Path) 
             "laws/fasil-113/madde-001.md": MADDE_001_V1951,
             "laws/fasil-113/madde-002.md": "# Madde 2: Kapsam\n\nKapsam metni.\n",
         },
+        law="fasil-113 Şirketler",
+        kind="baseline",
     )
     engine.apply_legislative_commit(
         DATE_2018,
         DEFAULT_AUTHOR_NAME,
         "2/2018 Sayılı Değişiklik Yasası: madde-002 yürürlükten kaldırıldı.",
         {},
+        law="2/2018",
+        kind="law",
         deleted_paths=["laws/fasil-113/madde-002.md"],
     )
 
@@ -333,16 +341,21 @@ def test_pre_epoch_queries_respect_real_effective_dates(tmp_path: Path) -> None:
         COLONIAL_AUTHOR_NAME,
         "fasil-148: ilk metin.",
         {path: "# Madde 1: Kısa İsim\n\n1951 metni.\n"},
+        law="fasil-148",
+        kind="baseline",
     )
     engine.apply_legislative_commit(
         "1960-08-16",
         COLONIAL_AUTHOR_NAME,
         "fasil-148: değişiklik.",
         {path: "# Madde 1: Kısa İsim\n\n1960 metni.\n"},
+        law="fasil-148 değişiklik",
+        kind="law",
     )
 
-    # İki commit de aynı Git zeminini taşır.
+    # İki commit de aynı Git gününü taşır, ancak saniye aralıklıdır.
     assert engine.commit_date("HEAD") == engine.commit_date(engine.root_commit()) == GIT_EPOCH_DATE
+    assert engine.commit_timestamp(engine.root_commit()) < engine.commit_timestamp("HEAD")
     assert engine.effective_date(engine.root_commit()) == "1951-06-01"
     assert engine.effective_date("HEAD") == "1960-08-16"
 
@@ -356,22 +369,25 @@ def test_engine_rejects_invalid_inputs(tmp_path: Path) -> None:
     valid_files = {"laws/fasil-113/madde-001.md": MADDE_001_V1951}
 
     with pytest.raises(ValueError):
-        engine.apply_legislative_commit("1951/06/01", COLONIAL_AUTHOR_NAME, "x", valid_files)
-
-    with pytest.raises(ValueError):
-        engine.apply_legislative_commit(DATE_1951, COLONIAL_AUTHOR_NAME, "x", {})
-
-    with pytest.raises(ValueError):
         engine.apply_legislative_commit(
-            DATE_1951, COLONIAL_AUTHOR_NAME, "x", {"../kacis.md": "içerik"}
+            "1951/06/01", COLONIAL_AUTHOR_NAME, "x", valid_files, law="x", kind="law"
         )
 
     with pytest.raises(ValueError):
-        engine.apply_legislative_commit(DATE_1951, COLONIAL_AUTHOR_NAME, "x", {"a.json": "{"})
+        engine.apply_legislative_commit(
+            DATE_1951, COLONIAL_AUTHOR_NAME, "x", {}, law="x", kind="law"
+        )
 
     with pytest.raises(ValueError):
         engine.apply_legislative_commit(
-            DATE_1951, COLONIAL_AUTHOR_NAME, "x", valid_files, tag_name="1951-06-01"
+            DATE_1951, COLONIAL_AUTHOR_NAME, "x", {"../kacis.md": "içerik"},
+            law="x",
+            kind="law",
+        )
+
+    with pytest.raises(ValueError):
+        engine.apply_legislative_commit(
+            DATE_1951, COLONIAL_AUTHOR_NAME, "x", {"a.json": "{"}, law="x", kind="law"
         )
 
     with pytest.raises(ValueError):
@@ -380,6 +396,19 @@ def test_engine_rejects_invalid_inputs(tmp_path: Path) -> None:
             COLONIAL_AUTHOR_NAME,
             "x",
             valid_files,
+            tag_name="1951-06-01",
+            law="x",
+            kind="law",
+        )
+
+    with pytest.raises(ValueError):
+        engine.apply_legislative_commit(
+            DATE_1951,
+            COLONIAL_AUTHOR_NAME,
+            "x",
+            valid_files,
+            law="x",
+            kind="law",
             deleted_paths=["laws/fasil-113/madde-001.md"],
         )
 
@@ -389,15 +418,27 @@ def test_engine_rejects_invalid_inputs(tmp_path: Path) -> None:
             COLONIAL_AUTHOR_NAME,
             "x",
             {},
+            law="x",
+            kind="law",
             deleted_paths=["laws/fasil-113/yok.md"],
         )
 
     assert engine.apply_legislative_commit(
-        DATE_1951, COLONIAL_AUTHOR_NAME, "İlk yürürlük", valid_files
+        DATE_1951,
+        COLONIAL_AUTHOR_NAME,
+        "İlk yürürlük",
+        valid_files,
+        law="x",
+        kind="baseline",
     )
 
     # Aynı içerikle ikinci kez commit atılamaz.
     with pytest.raises(GitEngineError):
         engine.apply_legislative_commit(
-            DATE_1951, COLONIAL_AUTHOR_NAME, "İlk yürürlük", valid_files
+            DATE_1951,
+            COLONIAL_AUTHOR_NAME,
+            "İlk yürürlük",
+            valid_files,
+            law="x",
+            kind="baseline",
         )

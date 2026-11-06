@@ -6,6 +6,7 @@ commit akışını tek bir `index.html` içine gömer. Çıktı Git snapshot'ın
 
 from __future__ import annotations
 
+import difflib
 from collections import Counter
 from html import escape
 from pathlib import Path
@@ -146,6 +147,90 @@ def _top_article_rows(stats) -> str:
     return "".join(rows)
 
 
+def _render_diff(lines: list[str], limit: int = 400) -> str:
+    rendered: list[str] = []
+    for line in lines[:limit]:
+        if line.startswith(("+++", "---")):
+            css = "diff-meta"
+        elif line.startswith("@@"):
+            css = "diff-hunk"
+        elif line.startswith("+"):
+            css = "diff-add"
+        elif line.startswith("-"):
+            css = "diff-del"
+        else:
+            css = "diff-context"
+        rendered.append(f'<span class="{css}">{escape(line)}</span>')
+    if len(lines) > limit:
+        rendered.append('<span class="diff-meta">… diff kısaltıldı …</span>')
+    return "\n".join(rendered)
+
+
+def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: int = 220) -> str:
+    cards: list[str] = []
+    for entry in commits[:max_commits]:
+        parent = engine.parent_commit(entry.commit_sha)
+        if parent is None:
+            continue
+        changed = engine.changed_files_between(parent, entry.commit_sha)
+        article_changes = [
+            change
+            for change in changed
+            if change.path.endswith(".md") and "/metadata.json" not in change.path
+        ]
+        for change in article_changes[:8]:
+            old = (
+                engine.read_file_at_commit(change.path, parent)
+                if change.status != "added"
+                else ""
+            )
+            new = (
+                engine.read_file_at_commit(change.path, entry.commit_sha)
+                if change.status != "deleted"
+                else ""
+            )
+            if old is None or new is None:
+                continue
+            parts = change.path.split("/")
+            law_id = parts[1] if len(parts) > 2 else entry.law_id
+            article_id = parts[-1].removesuffix(".md")
+            lines = list(
+                difflib.unified_diff(
+                    (old or "").splitlines(),
+                    (new or "").splitlines(),
+                    fromfile=f"a/{change.path}",
+                    tofile=f"b/{change.path}",
+                    lineterm="",
+                )
+            )
+            if not lines:
+                continue
+            label = f"{law_id} / {article_id}"
+            cards.append(
+                f'<details class="diff-card" data-search="'
+                f'{_fmt((law_id + " " + article_id + " " + entry.subject).lower())}">'
+                f"<summary><span class=\"diff-date\">{_fmt(entry.effective_date)}</span>"
+                f"<strong>{_fmt(label)}</strong>"
+                f"<span class=\"diff-subject\">{_fmt(entry.subject)}</span>"
+                f"<span class=\"diff-sha\">{_fmt(entry.commit_sha[:8])}</span></summary>"
+                f'<div class="diff-body">{_render_diff(lines)}</div></details>'
+            )
+            if len(cards) >= 80:
+                break
+        if len(cards) >= 80:
+            break
+    if not cards:
+        return (
+            '<p class="muted">Bu snapshot aralığında madde metni farkı bulunamadı. '
+            "Hibrit replay'de bazı commit'ler yalnızca metadata güncellemesidir.</p>"
+        )
+    return (
+        '<div class="toolbar"><input id="diff-search" type="search" '
+        'placeholder="Yasa, madde veya commit konusunda ara…"></div>'
+        '<div id="diff-list">' + "".join(cards) + "</div>"
+    )
+
+
 def render_dashboard(engine: DeterministicGitEngine) -> str:
     """Mevcut Git snapshot'ından dashboard HTML'i üretir."""
     stats = statistics_from_engine(engine)
@@ -160,6 +245,7 @@ def render_dashboard(engine: DeterministicGitEngine) -> str:
         (f"{item.law_id} · {item.title[:38]}", item.amendment_count)
         for item in stats.top_laws
     ]
+    diff_html = _diff_section(engine, commits)
 
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -230,6 +316,21 @@ tr:hover td {{ background:#f8fafc; }}
   font-weight:700; color:#fff; }}
 .badge-anayasa {{ background:#0ea5a4; }} .badge-fasil {{ background:#2563eb; }}
 .badge-yasa {{ background:#d97706; }}
+.diff-card {{ border:1px solid var(--line); border-radius:10px; margin:10px 0;
+  background:#fbfdff; overflow:hidden; }}
+.diff-card summary {{ cursor:pointer; padding:10px 12px; display:flex; gap:10px;
+  align-items:center; flex-wrap:wrap; }}
+.diff-card summary strong {{ font-size:13px; }}
+.diff-date, .diff-sha {{ color:var(--muted); font-size:11px; font-family:ui-monospace,monospace; }}
+.diff-subject {{ color:#475569; font-size:12px; flex:1; min-width:180px; }}
+.diff-body {{ border-top:1px solid var(--line); padding:10px 12px; overflow:auto;
+  background:#fff; font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }}
+.diff-body span {{ display:block; white-space:pre-wrap; padding:0 5px; min-height:1.5em; }}
+.diff-add {{ background:#e8f8ee; color:#166534; }}
+.diff-del {{ background:#fdecec; color:#991b1b; }}
+.diff-hunk {{ background:#eff6ff; color:#1d4ed8; margin-top:5px; }}
+.diff-meta {{ color:#64748b; font-style:italic; }}
+.diff-context {{ color:#334155; }}
 .toolbar {{ display:flex; justify-content:space-between; gap:12px; align-items:center;
   margin-bottom:10px; flex-wrap:wrap; }}
 input[type=search] {{ border:1px solid var(--line); border-radius:9px; padding:9px 12px;
@@ -306,6 +407,13 @@ footer {{ color:var(--muted); font-size:12px; text-align:center; padding:24px; }
       <tbody>{_commit_rows(commits)}</tbody></table>
     </div>
   </section>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Madde metni değişiklikleri <span>git diff görünümü</span></h2>
+    <p class="muted">Son commit'lerde eklenen, değişen veya silinen madde metinleri.
+    Kırmızı satırlar eski, yeşil satırlar yeni metindir.</p>
+    {diff_html}
+  </section>
 </main>
 <footer>kktc-law · deterministik Git külliyatı · bu sayfa dış servis kullanmaz</footer>
 <script>
@@ -316,6 +424,15 @@ search.addEventListener('input', () => {{
     row.style.display = row.dataset.search.includes(q) ? '' : 'none';
   }});
 }});
+const diffSearch = document.getElementById('diff-search');
+if (diffSearch) {{
+  diffSearch.addEventListener('input', () => {{
+    const q = diffSearch.value.toLocaleLowerCase('tr');
+    document.querySelectorAll('#diff-list .diff-card').forEach(card => {{
+      card.style.display = card.dataset.search.includes(q) ? '' : 'none';
+    }});
+  }});
+}}
 </script>
 </body>
 </html>

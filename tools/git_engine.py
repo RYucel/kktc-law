@@ -19,10 +19,12 @@ import re
 import subprocess
 import unicodedata
 from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
 from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
 from tools.models import (
+    CommitKind,
     FileChange,
     LawMetadata,
     SearchHit,
@@ -34,14 +36,20 @@ __all__ = [
     "COLONIAL_AUTHOR_NAME",
     "DEFAULT_AUTHOR_NAME",
     "DEFAULT_BRANCH",
-    "EFFECTIVE_DATE_TRAILER",
+    "FUTURE_BRANCH",
     "GIT_EPOCH_DATE",
+    "IN_FORCE_TRAILER",
+    "KIND_TRAILER",
+    "LAW_TRAILER",
+    "LEGACY_EFFECTIVE_DATE_TRAILER",
     "DeterministicGitEngine",
     "GitEngineError",
     "is_repealed_text",
 ]
 
 DEFAULT_BRANCH: Final[str] = "main"
+#: Kesim tarihinde henüz yürürlükte olmayan yasaların taşındığı dal.
+FUTURE_BRANCH: Final[str] = "future"
 DEFAULT_AUTHOR_NAME: Final[str] = "KKTC Cumhuriyet Meclisi"
 COLONIAL_AUTHOR_NAME: Final[str] = "Kıbrıs Koloni İdaresi"
 DEFAULT_AUTHOR_EMAIL: Final[str] = "mevzuat@kktc-law.local"
@@ -50,9 +58,14 @@ COMMITTER_EMAIL: Final[str] = "bot@kktc-law.local"
 
 #: Git, 1970-01-01 öncesi zaman damgalarını (negatif `time_t`) nesne biçiminde kabul etmez.
 #: Bu nedenle 1970 öncesi yürürlük tarihleri bu sabit "zemin"e taşınır; gerçek tarih commit
-#: mesajındaki `Effective-Date` trailer'ında ve `metadata.json` içinde korunur.
+#: mesajındaki `In-force` trailer'ında ve `metadata.json` içinde korunur.
 GIT_EPOCH_DATE: Final[str] = "1970-01-01"
-EFFECTIVE_DATE_TRAILER: Final[str] = "Effective-Date"
+LAW_TRAILER: Final[str] = "Law"
+IN_FORCE_TRAILER: Final[str] = "In-force"
+KIND_TRAILER: Final[str] = "Kind"
+#: Eski biçimde yazılmış geçmişi okuyabilmek için tanınan, artık yazılmayan trailer.
+LEGACY_EFFECTIVE_DATE_TRAILER: Final[str] = "Effective-Date"
+_COMMIT_KINDS: Final[tuple[str, ...]] = ("baseline", "law")
 
 _TAG_RE: Final[re.Pattern[str]] = re.compile(r"^v\d{4}-\d{2}-\d{2}$")
 _EMPTY_TREE_SHA: Final[str] = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -60,8 +73,11 @@ _LAW_ID_QUERY_RE: Final[re.Pattern[str]] = re.compile(
     r"^(?:fasil-\d+|yasa-\d{4}-\d+|anayasa)$"
 )
 _STAGE_CHUNK_SIZE: Final[int] = 500
-_EFFECTIVE_DATE_RE: Final[re.Pattern[str]] = re.compile(
-    rf"(?m)^{re.escape(EFFECTIVE_DATE_TRAILER)}: (\d{{4}}-\d{{2}}-\d{{2}})$"
+_IN_FORCE_RE: Final[re.Pattern[str]] = re.compile(
+    rf"(?m)^{re.escape(IN_FORCE_TRAILER)}: (\d{{4}}-\d{{2}}-\d{{2}})$"
+)
+_LEGACY_EFFECTIVE_DATE_RE: Final[re.Pattern[str]] = re.compile(
+    rf"(?m)^{re.escape(LEGACY_EFFECTIVE_DATE_TRAILER)}: (\d{{4}}-\d{{2}}-\d{{2}})$"
 )
 _REPEAL_MARKERS: Final[tuple[str, ...]] = (
     "yürürlükten kaldırılmıştır",
@@ -153,6 +169,8 @@ class DeterministicGitEngine:
         file_changes: dict[str, str],
         tag_name: str | None = None,
         *,
+        law: str,
+        kind: CommitKind,
         deleted_paths: Sequence[str] = (),
     ) -> str:
         """Bir yürürlük/değişiklik olayını tek bir deterministik commit olarak yazar.
@@ -163,6 +181,8 @@ class DeterministicGitEngine:
             commit_message: Commit mesajı; LF'e normalize edilip tek son satır sonu eklenir.
             file_changes: Göreli yol -> dosya içeriği. `.json` içerikleri sıralı biçimde yazılır.
             tag_name: Verilirse `vYYYY-MM-DD` biçiminde açıklamalı (annotated) tag oluşturulur.
+            law: `Law` trailer değeri (örn. `fasil-113 Şirketler` veya `41/2018`); tek satır.
+            kind: `Kind` trailer değeri; kök/ilk metin için `baseline`, değişiklik için `law`.
             deleted_paths: Yürürlükten kaldırılan (dosyası silinecek) maddeler.
 
         Returns:
@@ -179,8 +199,11 @@ class DeterministicGitEngine:
             raise ValueError("file_changes ve deleted_paths birlikte boş olamaz")
         normalized_tag = self._normalize_tag_name(tag_name) if tag_name is not None else None
 
-        message = self._message_with_effective_date(
-            self._normalize_commit_message(commit_message), iso_date
+        message = self._message_with_trailers(
+            self._normalize_commit_message(commit_message),
+            law=law,
+            in_force=iso_date,
+            kind=kind,
         )
         payloads: dict[str, bytes] = {}
         for raw_path, content in file_changes.items():
@@ -263,9 +286,15 @@ class DeterministicGitEngine:
         """Açıklamalı (annotated) ve deterministik bir tag oluşturup SHA-1'ini döndürür."""
         tag = self._normalize_tag_name(tag_name)
         target = commit_sha or self.head()
-        tag_env = env or self._legislative_env(
-            self.effective_date(target), self.default_author_name
-        )
+        tag_env = env
+        if tag_env is None:
+            # Etiket, hedef commit'in kendi damgasını taşır (yeni damga hesaplanmaz).
+            tag_env = self._legislative_env(
+                self.effective_date(target), self.default_author_name
+            )
+            stamp = self.commit_timestamp(target)
+            tag_env["GIT_AUTHOR_DATE"] = stamp
+            tag_env["GIT_COMMITTER_DATE"] = stamp
         body = message or f"{tag}\n"
         self._run_git(
             [
@@ -294,7 +323,7 @@ class DeterministicGitEngine:
 
         `resolve_commit_as_of` ile tarihteki son commit bulunur, ardından
         `git show <sha>:<path>` ile içerik belleğe alınır. `git checkout` **kullanılmaz**.
-        1970 öncesi tarihlerde adaylar `Effective-Date` trailer'ına göre daraltılır.
+        1970 öncesi tarihlerde adaylar `In-force` trailer'ına göre daraltılır.
 
         Args:
             relative_path: Repo köküne göre dosya yolu.
@@ -334,7 +363,7 @@ class DeterministicGitEngine:
         `as_of_date=None` ise doğrudan `HEAD` çözümlenir. 1970 ve sonrası için
         `git rev-list --before` kullanılır. 1970 öncesi tarihlerde tüm yasama commit'leri
         Git zemin tarihine (1970-01-01) taşındığı için adaylar commit mesajlarındaki
-        `Effective-Date` trailer'ı ile daraltılır; böylece Fasıl dönemi (1951 gibi)
+        `In-force` trailer'ı ile daraltılır; böylece Fasıl dönemi (1951 gibi)
         sorguları da doğru sonucu verir.
         """
         if as_of_date is None:
@@ -774,7 +803,8 @@ class DeterministicGitEngine:
         raw = self._decode(result.stdout).strip()
         if not raw:  # pragma: no cover - savunma amaçlı
             raise GitEngineError(f"Commit tarihi okunamadı: {commit_sha}")
-        return raw
+        # Yeni Git sürümleri UTC'yi `Z` ile yazar; biçimi her sürümde `+00:00`a sabitle.
+        return raw[:-1] + "+00:00" if raw.endswith("Z") else raw
 
     def commit_message(self, commit_sha: str = "HEAD") -> str:
         """Commit mesajının tam gövdesini (trailer dahil) döndürür."""
@@ -790,6 +820,17 @@ class DeterministicGitEngine:
         """Commit yazarının adını döndürür."""
         result = self._run_git(["show", "-s", "--format=%an", commit_sha])
         return self._decode(result.stdout).strip()
+
+    def parent_commit(self, commit_sha: str = "HEAD") -> str | None:
+        """Commit'in ilk ebeveyn SHA-1'ini, yoksa `None` döndürür."""
+        result = self._run_git(
+            ["show", "-s", "--format=%P", commit_sha],
+            allow_failure=True,
+        )
+        if result.returncode != 0:
+            return None
+        parents = self._decode(result.stdout).split()
+        return parents[0] if parents else None
 
     def changed_files_between(
         self,
@@ -829,7 +870,7 @@ class DeterministicGitEngine:
         return sorted(changes, key=lambda item: (item.path, item.status))
 
     def effective_date(self, commit_sha: str = "HEAD") -> str:
-        """Commit'in gerçek yürürlük tarihini (`Effective-Date` trailer'ı) döndürür.
+        """Commit'in gerçek yürürlük tarihini (`In-force` trailer'ı) döndürür.
 
         Trailer bulunamazsa Git zaman damgasına geri düşer.
         """
@@ -847,6 +888,39 @@ class DeterministicGitEngine:
         result = self._run_git(["ls-tree", "-r", "--name-only", commit_sha])
         return sorted(self._decode(result.stdout).splitlines())
 
+    def finalize_branches(self, cutoff: str) -> str | None:
+        """`main` ucunu kesim tarihine çeker, sonrasını `future` dalına taşır.
+
+        `main` ucu, `In-force` tarihi `cutoff` değerine eşit veya daha küçük olan en yeni
+        commit'tir. Daha yeni commit'ler varsa eski uç `future` dalı olur ve çalışma ağacı
+        yeni `main` ucuna sıfırlanır (yalnızca inşa sonunda çağrılmalıdır; sorgu araçları
+        asla `reset`/`checkout` yapmaz).
+
+        Args:
+            cutoff: Kesim tarihi (`YYYY-MM-DD`).
+
+        Returns:
+            `future` oluşturulduysa onun SHA-1'i, aksi halde `None`.
+
+        Raises:
+            ValueError: Tarih geçersizse veya hiçbir commit kesim tarihinde yürürlükte değilse.
+        """
+        cutoff = validate_iso_date(cutoff)
+        old_head = self.head()
+        tip: str | None = None
+        for sha in self.list_commits(old_head):
+            if self.effective_date(sha) <= cutoff:
+                tip = sha
+                break
+        if tip is None:
+            raise ValueError(f"{cutoff} tarihinde yürürlükte olan hiçbir commit yok")
+        if tip == old_head:
+            return None
+        env = self._base_env()
+        self._run_git(["update-ref", f"refs/heads/{FUTURE_BRANCH}", old_head], env=env)
+        self._run_git(["reset", "--hard", "--quiet", tip], env=env)
+        return old_head
+
     def is_clean(self) -> bool:
         """Çalışma ağacında izlenmeyen/değişmiş dosya yok mu?"""
         result = self._run_git(["status", "--porcelain"], allow_failure=True)
@@ -859,10 +933,35 @@ class DeterministicGitEngine:
         """`YYYY-MM-DD` tarihini Git'in sabit UTC damgasına dönüştürür."""
         return f"{validate_iso_date(effective_date)}T00:00:00+00:00"
 
+    def _commit_stamp(self, effective_date: str) -> str:
+        """Yürürlük gününden, ebeveynle uyumlu tek (yazar = işleyen) Git damgasını üretir.
+
+        1970 öncesi günler Git'in negatif epoch'una yazılmaz: kök commit
+        `1970-01-01T00:00:00`, sonrakiler ebeveyn + 1 saniye olur. 1970 ve sonrası
+        `YYYY-MM-DDT00:00:00` olur; ebeveynden eskiyse ebeveynin damgası kullanılır.
+        """
+        iso_date = validate_iso_date(effective_date)
+        parent: datetime | None = None
+        if self.has_commits():
+            result = self._run_git(["log", "-1", "--format=%cI", "HEAD"])
+            parent = datetime.fromisoformat(self._decode(result.stdout).strip()).astimezone(
+                UTC
+            )
+        if iso_date < GIT_EPOCH_DATE:
+            stamp = (
+                datetime(1970, 1, 1, tzinfo=UTC)
+                if parent is None
+                else parent + timedelta(seconds=1)
+            )
+        else:
+            stamp = datetime.fromisoformat(self.format_git_date(iso_date))
+            if parent is not None and stamp < parent:
+                stamp = parent
+        return stamp.isoformat(timespec="seconds")
+
     def _legislative_env(self, effective_date: str, author_name: str) -> dict[str, str]:
         env = self._base_env()
-        iso_date = validate_iso_date(effective_date)
-        stamp = self.format_git_date(iso_date if iso_date >= GIT_EPOCH_DATE else GIT_EPOCH_DATE)
+        stamp = self._commit_stamp(effective_date)
         env.update(
             {
                 "GIT_AUTHOR_NAME": author_name,
@@ -932,15 +1031,28 @@ class DeterministicGitEngine:
         return raw.decode("utf-8", errors="strict")
 
     @staticmethod
-    def _message_with_effective_date(normalized_message: str, effective_date: str) -> str:
-        """Commit mesajına makine-okunur `Effective-Date` trailer'ını ekler."""
+    def _message_with_trailers(
+        normalized_message: str, *, law: str, in_force: str, kind: CommitKind
+    ) -> str:
+        """Commit mesajına sabit sıralı `Law` / `In-force` / `Kind` trailer bloğunu ekler."""
+        law_value = law.strip() if isinstance(law, str) else ""
+        if not law_value:
+            raise ValueError("law boş olamaz")
+        if "\n" in law_value or "\r" in law_value:
+            raise ValueError("law tek satır olmalıdır")
+        if kind not in _COMMIT_KINDS:
+            raise ValueError(f"kind 'baseline' veya 'law' olmalıdır: {kind!r}")
         base = normalized_message.rstrip("\n")
-        return f"{base}\n\n{EFFECTIVE_DATE_TRAILER}: {effective_date}\n"
+        return (
+            f"{base}\n\n{LAW_TRAILER}: {law_value}\n"
+            f"{IN_FORCE_TRAILER}: {in_force}\n{KIND_TRAILER}: {kind}\n"
+        )
 
     @staticmethod
     def _effective_date_from_body(body: str) -> str | None:
-        """Commit gövdesindeki son `Effective-Date` trailer'ını `YYYY-MM-DD` olarak döndürür."""
-        matches = _EFFECTIVE_DATE_RE.findall(body.replace("\r\n", "\n"))
+        """Gövdedeki son `In-force` (yoksa eski `Effective-Date`) trailer'ını döndürür."""
+        text = body.replace("\r\n", "\n")
+        matches = _IN_FORCE_RE.findall(text) or _LEGACY_EFFECTIVE_DATE_RE.findall(text)
         if not matches:
             return None
         try:
