@@ -351,7 +351,21 @@ def _normalize_whitespace(text: str) -> str:
 
     while collapsed and not collapsed[-1]:
         collapsed.pop()
-    return "\n".join(collapsed)
+
+    # Word/OCR kaynaklarında aynı satır 3+ kez üst üste gelebiliyor; bunları tekilleştir.
+    deduped: list[str] = []
+    index = 0
+    while index < len(collapsed):
+        end = index + 1
+        while end < len(collapsed) and collapsed[end] == collapsed[index]:
+            end += 1
+        run_length = end - index
+        if collapsed[index] and run_length >= 3:
+            deduped.append(collapsed[index])
+        else:
+            deduped.extend(collapsed[index:end])
+        index = end
+    return "\n".join(deduped)
 
 
 def normalize_legal_text(value: str | bytes, *, encoding: str | None = None) -> str:

@@ -147,6 +147,22 @@ def _top_article_rows(stats) -> str:
     return "".join(rows)
 
 
+def _collapse_repeated_lines(text: str) -> str:
+    lines = text.splitlines()
+    deduped: list[str] = []
+    index = 0
+    while index < len(lines):
+        end = index + 1
+        while end < len(lines) and lines[end] == lines[index]:
+            end += 1
+        if lines[index].strip() and end - index >= 3:
+            deduped.append(lines[index])
+        else:
+            deduped.extend(lines[index:end])
+        index = end
+    return "\n".join(deduped)
+
+
 def _law_text(engine: DeterministicGitEngine, law_id: str, commit_sha: str) -> str:
     """Bir yasanın tüm madde dosyalarını sıralı biçimde birleştirir."""
     prefix = f"laws/{law_id}/"
@@ -161,7 +177,7 @@ def _law_text(engine: DeterministicGitEngine, law_id: str, commit_sha: str) -> s
         if content is None:
             continue
         file_name = path.rsplit("/", 1)[-1]
-        parts.append(f"<!-- {file_name} -->\n{content.rstrip()}")
+        parts.append(f"<!-- {file_name} -->\n{_collapse_repeated_lines(content.rstrip())}")
     return "\n\n".join(parts)
 
 
@@ -230,7 +246,8 @@ def _side_by_side(old: str, new: str, limit: int = 700) -> str:
 
 def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: int = 220) -> str:
     """Commit başına, değişen yasanın tam metnini eski/yeni yan yana gösterir."""
-    cards: list[str] = []
+    diff_cards: list[str] = []
+    new_law_cards: list[str] = []
     for entry in commits[:max_commits]:
         parent = engine.parent_commit(entry.commit_sha)
         if parent is None:
@@ -246,6 +263,7 @@ def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: in
             new = _law_text(engine, law_id, entry.commit_sha)
             if old == new:
                 continue
+            is_new_law = not old
             diff_html = _side_by_side(old, new)
             change_count = len(
                 [
@@ -257,19 +275,28 @@ def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: in
                 ]
             )
             search = f"{law_id} {entry.subject}".lower()
-            cards.append(
+            label = f"{law_id} · yeni yasa" if is_new_law else f"{law_id} · tam yasa metni"
+            note = (
+                '<p class="diff-note">İlk yürürlük — önceki sürüm yok, yalnızca yeni metin.</p>'
+                if is_new_law
+                else ""
+            )
+            card = (
                 f'<details class="diff-card" data-search="{_fmt(search)}">'
                 f'<summary><span class="diff-date">{_fmt(entry.effective_date)}</span>'
-                f'<strong>{_fmt(law_id)} · tam yasa metni</strong>'
+                f"<strong>{_fmt(label)}</strong>"
                 f'<span class="diff-subject">{_fmt(entry.subject)}</span>'
                 f'<span class="diff-sha">{_fmt(entry.commit_sha[:8])} · '
                 f"{change_count} satır değişimi</span></summary>"
-                f'<div class="diff-body">{diff_html}</div></details>'
+                f'<div class="diff-body">{note}{diff_html}</div></details>'
             )
-            if len(cards) >= 60:
-                break
-        if len(cards) >= 60:
+            if is_new_law:
+                new_law_cards.append(card)
+            else:
+                diff_cards.append(card)
+        if len(diff_cards) + len(new_law_cards) >= 120:
             break
+    cards = (diff_cards + new_law_cards)[:60]
     if not cards:
         return (
             '<p class="muted">Bu snapshot aralığında yasa metni farkı bulunamadı. '
@@ -386,6 +413,8 @@ tr:hover td {{ background:#f8fafc; }}
 .diff-add {{ background:#e8f8ee; color:#166534; }}
 .diff-empty {{ background:#f8fafc; }}
 .diff-meta {{ color:#64748b; font-style:italic; }}
+.diff-note {{ margin:0 0 8px; padding:7px 10px; border-radius:7px; background:#fff7ed;
+  color:#9a3412; font-size:12px; }}
 .toolbar {{ display:flex; justify-content:space-between; gap:12px; align-items:center;
   margin-bottom:10px; flex-wrap:wrap; }}
 input[type=search] {{ border:1px solid var(--line); border-radius:9px; padding:9px 12px;
@@ -466,7 +495,8 @@ footer {{ color:var(--muted); font-size:12px; text-align:center; padding:24px; }
   <section class="panel" style="margin-top:18px">
     <h2>Yasa metni diff görünümü <span>eski / yeni yan yana</span></h2>
     <p class="muted">Değişen yasanın tam metni: solda önceki sürüm, sağda yeni sürüm.
-    Kırmızı satırlar kaldırılan/eskimiş, yeşil satırlar eklenen/yeni metindir.</p>
+    Kırmızı satırlar kaldırılan/eskimiş, yeşil satırlar eklenen/yeni metindir.
+    İlk yürürlük kartlarında önceki sürüm doğal olarak yoktur.</p>
     {diff_html}
   </section>
 </main>
