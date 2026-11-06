@@ -195,7 +195,7 @@ _ARTICLE_BEFORE_RE: Final[re.Pattern[str]] = re.compile(
 
 _ACRONYMS: Final[frozenset[str]] = frozenset({"KKTC", "TRNC", "KHK", "TBMM", "AB", "BM", "TC"})
 _GENERIC_TITLES: Final[frozenset[str]] = frozenset(
-    {"", "yasa", "kanun", "sayılı yasa", "sayılı kanun", "tüzük", "khk"}
+    {"", "yasa", "kanun", "sayılı yasa", "sayılı kanun", "tüzük", "khk", "sayı", "sayi"}
 )
 
 
@@ -479,7 +479,12 @@ def _resolve_law_date(
             raise ValueError(f"Geçersiz tarih override: {law_id} -> {override_date}")
         return override_date, "override"
     if document_date is not None:
-        return validate_iso_date(document_date), "explicit"
+        if law_type == "yasa":
+            match = re.fullmatch(r"yasa-(\d{4})-\d+", law_id)
+            if match is not None and document_date[:4] < match.group(1):
+                document_date = None
+        if document_date is not None:
+            return validate_iso_date(document_date), "explicit"
     if law_type == "fasil":
         earliest_year = _earliest_amendment_year(text)
         year = earliest_year if earliest_year is not None and earliest_year < 1959 else 1959
@@ -932,7 +937,18 @@ def _match_article_marker(
         return number, prefix.startswith("geçici"), line[modern.end() :]
 
     if not previous_blank:
+        fasil = _FASIL_MARKER_RE.match(line)
+        if fasil is None:
+            return None
+        number = int(fasil.group("number"))
+        rest = line[fasil.end() :].strip()
+        if number > 999 or number <= last_main:
+            return None
+        # Modern Word belgelerinde "1. Bu Yasa..." bazen boş satır olmadan gelir.
+        if not rest or rest[0].isupper():
+            return number, False, rest
         return None
+
     fasil = _FASIL_MARKER_RE.match(line)
     if fasil is None:
         return None

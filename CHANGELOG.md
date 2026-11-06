@@ -19,6 +19,9 @@ Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar
 - Yasa tablosundan açılan `laws/<law_id>.html` sayfaları, bir yasanın tüm commit geçmişini
   ve tam metin farklarını tek görünümde gösterir.
 - Parser, Word/OCR kaynaklarında üst üste 3+ kez tekrarlanan satırları tekilleştirir.
+- 2026 yılı fihristinden 15 yeni yasa alındı; külliyat 65 yasa / 2455 madde / 366 commit oldu.
+- Modern Word belgelerinde boş satır olmadan gelen `1. Madde` işaretleri ve `Sayı: NN/YYYY`
+  başlıkları parser tarafından doğru çözümlenir.
 
 ## [0.1.0] - 2026-11-02
 

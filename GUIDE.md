@@ -339,8 +339,8 @@ uv run python -m tools.build_corpus \
 ```json
 {
   "law_count": 50,
-  "article_count": 1960,
-  "commit_count": 346,
+  "article_count": 2455,
+  "commit_count": 366,
   "head_sha": "…",
   "skipped_laws": [
     {"law_id": "fasil-110", "reason": "hiç madde ayrıştırılamadı"}
@@ -688,10 +688,9 @@ Tetikleyiciler:
 ### Güncel canlı durum
 
 - Dashboard: <https://ryucel.github.io/kktc-law/>
-- Son yerel 50 yasalık külliyat: **50 yasa, 1960 madde, 346 commit**
-- Anayasa: **1**
-- Son yürürlük tarihi: **2026-01-01**
-- `skipped_laws: []`
+- Son yerel 65 yasalık külliyat: **65 yasa, 2455 madde, 366 commit**
+- Son yürürlük tarihi: **2026-09-10**
+- 2026 yılından **15 yeni yasa** dahil edildi.
 
 Canlı GitHub runner temiz ortamında ilk 80 kaynaktan 50 yasa hedeflenir; erişilemeyen
 kaynaklar `skipped_laws` ile raporlanır.
