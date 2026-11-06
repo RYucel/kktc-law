@@ -353,8 +353,9 @@ def test_pre_epoch_queries_respect_real_effective_dates(tmp_path: Path) -> None:
         kind="law",
     )
 
-    # İki commit de aynı Git zeminini taşır.
+    # İki commit de aynı Git gününü taşır, ancak saniye aralıklıdır.
     assert engine.commit_date("HEAD") == engine.commit_date(engine.root_commit()) == GIT_EPOCH_DATE
+    assert engine.commit_timestamp(engine.root_commit()) < engine.commit_timestamp("HEAD")
     assert engine.effective_date(engine.root_commit()) == "1951-06-01"
     assert engine.effective_date("HEAD") == "1960-08-16"
 

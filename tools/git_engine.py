@@ -19,6 +19,7 @@ import re
 import subprocess
 import unicodedata
 from collections.abc import Sequence
+from datetime import datetime, timedelta, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
@@ -282,9 +283,15 @@ class DeterministicGitEngine:
         """Açıklamalı (annotated) ve deterministik bir tag oluşturup SHA-1'ini döndürür."""
         tag = self._normalize_tag_name(tag_name)
         target = commit_sha or self.head()
-        tag_env = env or self._legislative_env(
-            self.effective_date(target), self.default_author_name
-        )
+        tag_env = env
+        if tag_env is None:
+            # Etiket, hedef commit'in kendi damgasını taşır (yeni damga hesaplanmaz).
+            tag_env = self._legislative_env(
+                self.effective_date(target), self.default_author_name
+            )
+            stamp = self.commit_timestamp(target)
+            tag_env["GIT_AUTHOR_DATE"] = stamp
+            tag_env["GIT_COMMITTER_DATE"] = stamp
         body = message or f"{tag}\n"
         self._run_git(
             [
@@ -793,7 +800,8 @@ class DeterministicGitEngine:
         raw = self._decode(result.stdout).strip()
         if not raw:  # pragma: no cover - savunma amaçlı
             raise GitEngineError(f"Commit tarihi okunamadı: {commit_sha}")
-        return raw
+        # Yeni Git sürümleri UTC'yi `Z` ile yazar; biçimi her sürümde `+00:00`a sabitle.
+        return raw[:-1] + "+00:00" if raw.endswith("Z") else raw
 
     def commit_message(self, commit_sha: str = "HEAD") -> str:
         """Commit mesajının tam gövdesini (trailer dahil) döndürür."""
@@ -878,10 +886,35 @@ class DeterministicGitEngine:
         """`YYYY-MM-DD` tarihini Git'in sabit UTC damgasına dönüştürür."""
         return f"{validate_iso_date(effective_date)}T00:00:00+00:00"
 
+    def _commit_stamp(self, effective_date: str) -> str:
+        """Yürürlük gününden, ebeveynle uyumlu tek (yazar = işleyen) Git damgasını üretir.
+
+        1970 öncesi günler Git'in negatif epoch'una yazılmaz: kök commit
+        `1970-01-01T00:00:00`, sonrakiler ebeveyn + 1 saniye olur. 1970 ve sonrası
+        `YYYY-MM-DDT00:00:00` olur; ebeveynden eskiyse ebeveynin damgası kullanılır.
+        """
+        iso_date = validate_iso_date(effective_date)
+        parent: datetime | None = None
+        if self.has_commits():
+            result = self._run_git(["log", "-1", "--format=%cI", "HEAD"])
+            parent = datetime.fromisoformat(self._decode(result.stdout).strip()).astimezone(
+                timezone.utc
+            )
+        if iso_date < GIT_EPOCH_DATE:
+            stamp = (
+                datetime(1970, 1, 1, tzinfo=timezone.utc)
+                if parent is None
+                else parent + timedelta(seconds=1)
+            )
+        else:
+            stamp = datetime.fromisoformat(self.format_git_date(iso_date))
+            if parent is not None and stamp < parent:
+                stamp = parent
+        return stamp.isoformat(timespec="seconds")
+
     def _legislative_env(self, effective_date: str, author_name: str) -> dict[str, str]:
         env = self._base_env()
-        iso_date = validate_iso_date(effective_date)
-        stamp = self.format_git_date(iso_date if iso_date >= GIT_EPOCH_DATE else GIT_EPOCH_DATE)
+        stamp = self._commit_stamp(effective_date)
         env.update(
             {
                 "GIT_AUTHOR_NAME": author_name,

@@ -100,3 +100,93 @@ def test_parser_assigns_kind_and_law() -> None:
     assert plans[0].law == f"{header.law_id} {header.title}".strip()
     assert len(plans) > 1
     assert all(p.kind == "law" and p.law == p.amending_law for p in plans[1:])
+
+
+def _commit_dates(engine: DeterministicGitEngine, dates: list[str]) -> list[str]:
+    """Her tarih için, içeriği farklı bir madde dosyası commit'i yazar."""
+    path = "laws/fasil-113/madde-001.md"
+    for index, day in enumerate(dates):
+        engine.apply_legislative_commit(
+            day,
+            COLONIAL_AUTHOR_NAME,
+            f"fasil-113: {day}",
+            {path: f"# Madde 1\n\nMetin {day} #{index}.\n"},
+            law="fasil-113" if index == 0 else f"yasa-{index}",
+            kind="baseline" if index == 0 else "law",
+        )
+    return dates
+
+
+def test_pre_epoch_commits_are_one_second_apart_then_midnight(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["1899-06-02", "1951-06-01", "1960-08-16", "1970-01-01", "1985-05-05"])
+    stamps = [engine.commit_timestamp(c) for c in engine.list_commits(reverse=True)]
+    assert stamps == [
+        "1970-01-01T00:00:00+00:00",
+        "1970-01-01T00:00:01+00:00",
+        "1970-01-01T00:00:02+00:00",
+        "1970-01-01T00:00:02+00:00",
+        "1985-05-05T00:00:00+00:00",
+    ]
+    committers = [
+        subprocess.run(
+            ["git", "-C", str(engine.repo_path), "show", "-s", "--format=%cI", c],
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip().replace("Z", "+00:00")
+        for c in engine.list_commits(reverse=True)
+    ]
+    assert committers == stamps
+
+
+def test_as_of_before_1970_excludes_real_1970_commit(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["1951-06-01", "1960-08-16", "1970-01-01"])
+    assert "1960-08-16" in (engine.read_file_as_of(LEGACY_PATH, "1969-12-31") or "")
+    assert "1970-01-01" in (engine.read_file_as_of(LEGACY_PATH, "1970-01-01") or "")
+    assert "1951-06-01" in (engine.read_file_as_of(LEGACY_PATH, "1951-06-01") or "")
+
+
+def test_same_day_post_epoch_commits_resolve_to_last(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["2026-01-01", "2026-01-01"])
+    assert engine.commit_timestamp("HEAD") == engine.commit_timestamp("HEAD~1")
+    assert engine.commit_timestamp("HEAD") == "2026-01-01T00:00:00+00:00"
+    assert engine.resolve_commit_as_of("2026-01-01") == engine.head()
+
+
+def test_out_of_order_post_epoch_date_never_goes_backwards(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["2018-09-05", "2010-01-01"])
+    assert engine.commit_timestamp("HEAD") == "2018-09-05T00:00:00+00:00"
+
+
+def test_tag_shares_commit_stamp(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["1951-06-01"])
+    engine.apply_legislative_commit(
+        "1960-08-16",
+        COLONIAL_AUTHOR_NAME,
+        "fasil-113: etiketli",
+        {LEGACY_PATH: "# Madde 1\n\nEtiketli.\n"},
+        "v1960-08-16",
+        law="yasa-1",
+        kind="law",
+    )
+    stamp = engine.commit_timestamp("HEAD")
+    assert stamp == "1970-01-01T00:00:01+00:00"
+    tagger = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(engine.repo_path),
+            "for-each-ref",
+            "--format=%(taggerdate:iso-strict)",
+            "refs/tags/v1960-08-16",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert tagger.replace("Z", "+00:00") == stamp
