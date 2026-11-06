@@ -190,3 +190,45 @@ def test_tag_shares_commit_stamp(tmp_path: Path) -> None:
         text=True,
     ).stdout.strip()
     assert tagger.replace("Z", "+00:00") == stamp
+
+
+def _ref_exists(engine: DeterministicGitEngine, ref: str) -> bool:
+    return (
+        subprocess.run(
+            ["git", "-C", str(engine.repo_path), "rev-parse", "--verify", "-q", ref],
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+
+
+def test_finalize_moves_future_commits_off_main(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["2020-01-01", "2026-11-02", "2026-12-01", "2026-12-15"])
+    old_head = engine.head()
+    future_sha = engine.finalize_branches("2026-11-02")
+    assert future_sha == old_head
+    assert engine.rev_parse("refs/heads/future") == old_head
+    assert engine.effective_date(engine.rev_parse("refs/heads/main")) == "2026-11-02"
+    assert engine.head() == engine.rev_parse("refs/heads/main")
+    assert engine.is_clean()
+    expected = "# Madde 1\n\nMetin 2026-11-02 #1.\n"
+    assert (engine.repo_path / LEGACY_PATH).read_text(encoding="utf-8") == expected
+    assert engine.read_file_as_of(LEGACY_PATH, "2026-12-31") == expected
+
+
+def test_finalize_without_future_commits_creates_no_branch(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["2020-01-01", "2026-11-02"])
+    assert engine.finalize_branches("2026-11-02") is None
+    assert not _ref_exists(engine, "refs/heads/future")
+
+
+def test_finalize_rejects_cutoff_before_all_commits(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "r")
+    _commit_dates(engine, ["2020-01-01", "2026-11-02"])
+    old_head = engine.head()
+    with pytest.raises(ValueError):
+        engine.finalize_branches("1800-01-01")
+    assert engine.head() == old_head
+    assert not _ref_exists(engine, "refs/heads/future")

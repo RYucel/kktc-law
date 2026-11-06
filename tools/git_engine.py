@@ -36,6 +36,7 @@ __all__ = [
     "COLONIAL_AUTHOR_NAME",
     "DEFAULT_AUTHOR_NAME",
     "DEFAULT_BRANCH",
+    "FUTURE_BRANCH",
     "GIT_EPOCH_DATE",
     "IN_FORCE_TRAILER",
     "KIND_TRAILER",
@@ -47,6 +48,8 @@ __all__ = [
 ]
 
 DEFAULT_BRANCH: Final[str] = "main"
+#: Kesim tarihinde henüz yürürlükte olmayan yasaların taşındığı dal.
+FUTURE_BRANCH: Final[str] = "future"
 DEFAULT_AUTHOR_NAME: Final[str] = "KKTC Cumhuriyet Meclisi"
 COLONIAL_AUTHOR_NAME: Final[str] = "Kıbrıs Koloni İdaresi"
 DEFAULT_AUTHOR_EMAIL: Final[str] = "mevzuat@kktc-law.local"
@@ -873,6 +876,39 @@ class DeterministicGitEngine:
         """Bir commit'teki tüm dosya yollarını alfabetik olarak döndürür."""
         result = self._run_git(["ls-tree", "-r", "--name-only", commit_sha])
         return sorted(self._decode(result.stdout).splitlines())
+
+    def finalize_branches(self, cutoff: str) -> str | None:
+        """`main` ucunu kesim tarihine çeker, sonrasını `future` dalına taşır.
+
+        `main` ucu, `In-force` tarihi `cutoff` değerine eşit veya daha küçük olan en yeni
+        commit'tir. Daha yeni commit'ler varsa eski uç `future` dalı olur ve çalışma ağacı
+        yeni `main` ucuna sıfırlanır (yalnızca inşa sonunda çağrılmalıdır; sorgu araçları
+        asla `reset`/`checkout` yapmaz).
+
+        Args:
+            cutoff: Kesim tarihi (`YYYY-MM-DD`).
+
+        Returns:
+            `future` oluşturulduysa onun SHA-1'i, aksi halde `None`.
+
+        Raises:
+            ValueError: Tarih geçersizse veya hiçbir commit kesim tarihinde yürürlükte değilse.
+        """
+        cutoff = validate_iso_date(cutoff)
+        old_head = self.head()
+        tip: str | None = None
+        for sha in self.list_commits(old_head):
+            if self.effective_date(sha) <= cutoff:
+                tip = sha
+                break
+        if tip is None:
+            raise ValueError(f"{cutoff} tarihinde yürürlükte olan hiçbir commit yok")
+        if tip == old_head:
+            return None
+        env = self._base_env()
+        self._run_git(["update-ref", f"refs/heads/{FUTURE_BRANCH}", old_head], env=env)
+        self._run_git(["reset", "--hard", "--quiet", tip], env=env)
+        return old_head
 
     def is_clean(self) -> bool:
         """Çalışma ağacında izlenmeyen/değişmiş dosya yok mu?"""
