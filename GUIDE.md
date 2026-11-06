@@ -514,10 +514,11 @@ Metadata değişikliklerinden doğan mantıksal madde güncellemeleri de eklenir
 
 İçerik: özet kartları, tür dağılımı, tarih kaynakları, on yıllık commit grafiği,
 en çok değişen yasalar/maddeler, aranabilir yasa tablosu, son commit'ler ve
-**madde metni git diff görünümü**.
+**yasa tam metni diff görünümü**.
 
-Diff görünümü, son commit'lerde eklenen/değişen/silinen madde metinlerini kırmızı/yeşil
-satırlarla ve yasa/madde/commit konusunda arama filtresiyle gösterir.
+Diff görünümü, değişen yasanın tüm maddelerini tek bir tam metin halinde birleştirir ve
+önceki/yeni sürümü yan yana gösterir. Kırmızı satırlar eski, yeşil satırlar yeni metindir;
+yasa veya commit konusunda arama yapılabilir.
 
 GitHub Pages: <https://ryucel.github.io/kktc-law/>
 

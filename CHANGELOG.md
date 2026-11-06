@@ -14,8 +14,8 @@ Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar
   değişiklikleri; hibrit replay'de yalnızca metadata'da işaretlenen maddeler de gösterilir.
 - MCP `get_commit_log` ve `get_corpus_changes` araçları.
 - `kktc-law dashboard` — dış servis gerektirmeyen statik HTML dashboard (özet kartları,
-  CSS/SVG grafikler, yasa arama tablosu, commit akışı ve madde metni git diff görünümü)
-  ve GitHub Pages deploy workflow'u.
+  CSS/SVG grafikler, yasa arama tablosu, commit akışı ve **tam yasa metni eski/yeni
+  yan yana diff görünümü**) ve GitHub Pages deploy workflow'u.
 
 ## [0.1.0] - 2026-11-02
 

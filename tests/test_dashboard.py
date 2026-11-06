@@ -93,7 +93,7 @@ def test_dashboard_renders_git_diff_view(tmp_path: Path) -> None:
     )
 
     html = render_dashboard(engine)
-    assert "Madde metni değişiklikleri" in html
+    assert "Yasa metni diff görünümü" in html
     assert "diff-add" in html
     assert "diff-del" in html
     assert "Yeni metin." in html

@@ -147,86 +147,137 @@ def _top_article_rows(stats) -> str:
     return "".join(rows)
 
 
-def _render_diff(lines: list[str], limit: int = 400) -> str:
-    rendered: list[str] = []
-    for line in lines[:limit]:
-        if line.startswith(("+++", "---")):
-            css = "diff-meta"
-        elif line.startswith("@@"):
-            css = "diff-hunk"
-        elif line.startswith("+"):
-            css = "diff-add"
-        elif line.startswith("-"):
-            css = "diff-del"
-        else:
-            css = "diff-context"
-        rendered.append(f'<span class="{css}">{escape(line)}</span>')
-    if len(lines) > limit:
-        rendered.append('<span class="diff-meta">… diff kısaltıldı …</span>')
-    return "\n".join(rendered)
+def _law_text(engine: DeterministicGitEngine, law_id: str, commit_sha: str) -> str:
+    """Bir yasanın tüm madde dosyalarını sıralı biçimde birleştirir."""
+    prefix = f"laws/{law_id}/"
+    paths = [
+        path
+        for path in engine.list_files_at_commit(commit_sha)
+        if path.startswith(prefix) and path.endswith(".md")
+    ]
+    parts: list[str] = []
+    for path in sorted(paths):
+        content = engine.read_file_at_commit(path, commit_sha)
+        if content is None:
+            continue
+        file_name = path.rsplit("/", 1)[-1]
+        parts.append(f"<!-- {file_name} -->\n{content.rstrip()}")
+    return "\n\n".join(parts)
+
+
+def _side_by_side(old: str, new: str, limit: int = 700) -> str:
+    """Eski/yeni tam yasa metnini satır hizalı iki sütunlu diff olarak üretir."""
+    old_lines = old.splitlines()
+    new_lines = new.splitlines()
+    matcher = difflib.SequenceMatcher(None, old_lines, new_lines, autojunk=False)
+    rows: list[str] = []
+    old_no = new_no = 0
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            for offset in range(i2 - i1):
+                old_no += 1
+                new_no += 1
+                rows.append(
+                    "<tr>"
+                    f'<td class="diff-ln">{old_no}</td>'
+                    f'<td class="diff-cell">{escape(old_lines[i1 + offset])}</td>'
+                    f'<td class="diff-ln">{new_no}</td>'
+                    f'<td class="diff-cell">{escape(new_lines[j1 + offset])}</td>'
+                    "</tr>"
+                )
+            continue
+        old_chunk = old_lines[i1:i2]
+        new_chunk = new_lines[j1:j2]
+        for index in range(max(len(old_chunk), len(new_chunk))):
+            old_line = old_chunk[index] if index < len(old_chunk) else None
+            new_line = new_chunk[index] if index < len(new_chunk) else None
+            if old_line is not None:
+                old_no += 1
+            if new_line is not None:
+                new_no += 1
+            old_html = (
+                f'<td class="diff-cell diff-del">{escape(old_line)}</td>'
+                if old_line is not None
+                else '<td class="diff-cell diff-empty"></td>'
+            )
+            new_html = (
+                f'<td class="diff-cell diff-add">{escape(new_line)}</td>'
+                if new_line is not None
+                else '<td class="diff-cell diff-empty"></td>'
+            )
+            rows.append(
+                "<tr>"
+                f'<td class="diff-ln">{old_no if old_line is not None else ""}</td>'
+                f"{old_html}"
+                f'<td class="diff-ln">{new_no if new_line is not None else ""}</td>'
+                f"{new_html}"
+                "</tr>"
+            )
+        if len(rows) > limit:
+            break
+    if len(rows) > limit:
+        rows = rows[:limit]
+        rows.append(
+            '<tr><td class="diff-ln"></td>'
+            '<td class="diff-cell diff-meta" colspan="3">… diff kısaltıldı …</td></tr>'
+        )
+    return (
+        '<table class="diff-table"><colgroup>'
+        '<col style="width:42px"><col><col style="width:42px"><col>'
+        "</colgroup><tbody>" + "".join(rows) + "</tbody></table>"
+    )
 
 
 def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: int = 220) -> str:
+    """Commit başına, değişen yasanın tam metnini eski/yeni yan yana gösterir."""
     cards: list[str] = []
     for entry in commits[:max_commits]:
         parent = engine.parent_commit(entry.commit_sha)
         if parent is None:
             continue
         changed = engine.changed_files_between(parent, entry.commit_sha)
-        article_changes = [
-            change
-            for change in changed
-            if change.path.endswith(".md") and "/metadata.json" not in change.path
-        ]
-        for change in article_changes[:8]:
-            old = (
-                engine.read_file_at_commit(change.path, parent)
-                if change.status != "added"
-                else ""
-            )
-            new = (
-                engine.read_file_at_commit(change.path, entry.commit_sha)
-                if change.status != "deleted"
-                else ""
-            )
-            if old is None or new is None:
-                continue
+        law_ids: set[str] = set()
+        for change in changed:
             parts = change.path.split("/")
-            law_id = parts[1] if len(parts) > 2 else entry.law_id
-            article_id = parts[-1].removesuffix(".md")
-            lines = list(
-                difflib.unified_diff(
-                    (old or "").splitlines(),
-                    (new or "").splitlines(),
-                    fromfile=f"a/{change.path}",
-                    tofile=f"b/{change.path}",
-                    lineterm="",
-                )
-            )
-            if not lines:
+            if len(parts) == 3 and parts[0] == "laws":
+                law_ids.add(parts[1])
+        for law_id in sorted(law_ids):
+            old = _law_text(engine, law_id, parent)
+            new = _law_text(engine, law_id, entry.commit_sha)
+            if old == new:
                 continue
-            label = f"{law_id} / {article_id}"
-            cards.append(
-                f'<details class="diff-card" data-search="'
-                f'{_fmt((law_id + " " + article_id + " " + entry.subject).lower())}">'
-                f"<summary><span class=\"diff-date\">{_fmt(entry.effective_date)}</span>"
-                f"<strong>{_fmt(label)}</strong>"
-                f"<span class=\"diff-subject\">{_fmt(entry.subject)}</span>"
-                f"<span class=\"diff-sha\">{_fmt(entry.commit_sha[:8])}</span></summary>"
-                f'<div class="diff-body">{_render_diff(lines)}</div></details>'
+            diff_html = _side_by_side(old, new)
+            change_count = len(
+                [
+                    line
+                    for line in difflib.unified_diff(
+                        old.splitlines(), new.splitlines(), lineterm=""
+                    )
+                    if line.startswith(("+", "-")) and not line.startswith(("+++", "---"))
+                ]
             )
-            if len(cards) >= 80:
+            search = f"{law_id} {entry.subject}".lower()
+            cards.append(
+                f'<details class="diff-card" data-search="{_fmt(search)}">'
+                f'<summary><span class="diff-date">{_fmt(entry.effective_date)}</span>'
+                f'<strong>{_fmt(law_id)} · tam yasa metni</strong>'
+                f'<span class="diff-subject">{_fmt(entry.subject)}</span>'
+                f'<span class="diff-sha">{_fmt(entry.commit_sha[:8])} · '
+                f"{change_count} satır değişimi</span></summary>"
+                f'<div class="diff-body">{diff_html}</div></details>'
+            )
+            if len(cards) >= 60:
                 break
-        if len(cards) >= 80:
+        if len(cards) >= 60:
             break
     if not cards:
         return (
-            '<p class="muted">Bu snapshot aralığında madde metni farkı bulunamadı. '
+            '<p class="muted">Bu snapshot aralığında yasa metni farkı bulunamadı. '
             "Hibrit replay'de bazı commit'ler yalnızca metadata güncellemesidir.</p>"
         )
     return (
         '<div class="toolbar"><input id="diff-search" type="search" '
-        'placeholder="Yasa, madde veya commit konusunda ara…"></div>'
+        'placeholder="Yasa veya commit konusunda ara…"></div>'
         '<div id="diff-list">' + "".join(cards) + "</div>"
     )
 
@@ -324,13 +375,17 @@ tr:hover td {{ background:#f8fafc; }}
 .diff-date, .diff-sha {{ color:var(--muted); font-size:11px; font-family:ui-monospace,monospace; }}
 .diff-subject {{ color:#475569; font-size:12px; flex:1; min-width:180px; }}
 .diff-body {{ border-top:1px solid var(--line); padding:10px 12px; overflow:auto;
-  background:#fff; font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }}
-.diff-body span {{ display:block; white-space:pre-wrap; padding:0 5px; min-height:1.5em; }}
-.diff-add {{ background:#e8f8ee; color:#166534; }}
+  background:#fff; max-height:620px; }}
+.diff-table {{ width:100%; border-collapse:collapse; table-layout:fixed;
+  font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }}
+.diff-table td {{ padding:0 6px; vertical-align:top; white-space:pre-wrap;
+  overflow-wrap:anywhere; border-bottom:1px solid #f1f5f9; }}
+.diff-ln {{ color:#94a3b8; text-align:right; user-select:none; background:#f8fafc; }}
+.diff-cell {{ color:#334155; }}
 .diff-del {{ background:#fdecec; color:#991b1b; }}
-.diff-hunk {{ background:#eff6ff; color:#1d4ed8; margin-top:5px; }}
+.diff-add {{ background:#e8f8ee; color:#166534; }}
+.diff-empty {{ background:#f8fafc; }}
 .diff-meta {{ color:#64748b; font-style:italic; }}
-.diff-context {{ color:#334155; }}
 .toolbar {{ display:flex; justify-content:space-between; gap:12px; align-items:center;
   margin-bottom:10px; flex-wrap:wrap; }}
 input[type=search] {{ border:1px solid var(--line); border-radius:9px; padding:9px 12px;
@@ -409,9 +464,9 @@ footer {{ color:var(--muted); font-size:12px; text-align:center; padding:24px; }
   </section>
 
   <section class="panel" style="margin-top:18px">
-    <h2>Madde metni değişiklikleri <span>git diff görünümü</span></h2>
-    <p class="muted">Son commit'lerde eklenen, değişen veya silinen madde metinleri.
-    Kırmızı satırlar eski, yeşil satırlar yeni metindir.</p>
+    <h2>Yasa metni diff görünümü <span>eski / yeni yan yana</span></h2>
+    <p class="muted">Değişen yasanın tam metni: solda önceki sürüm, sağda yeni sürüm.
+    Kırmızı satırlar kaldırılan/eskimiş, yeşil satırlar eklenen/yeni metindir.</p>
     {diff_html}
   </section>
 </main>
