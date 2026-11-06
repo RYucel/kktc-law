@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
+
+from tools.build_corpus import CorpusBuilder, app as build_app, render_corpus_json
 
 from tools.git_engine import (
     COLONIAL_AUTHOR_NAME,
@@ -232,3 +236,110 @@ def test_finalize_rejects_cutoff_before_all_commits(tmp_path: Path) -> None:
         engine.finalize_branches("1800-01-01")
     assert engine.head() == old_head
     assert not _ref_exists(engine, "refs/heads/future")
+
+
+# ------------------------------------------------------------------ kesim tarihi / inşa
+
+SRC_FASIL = Path(__file__).parent / "fixtures" / "fasil_113_sample.html"
+SRC_YASA = Path(__file__).parent / "fixtures" / "yasa_2024_42_sample.html"
+BUILD_AMENDMENTS = {"28/1974": "1974-12-15", "41/2018": "2026-12-01"}
+
+
+def _build_sources(directory: Path) -> Path:
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "fasil_113_sample.html").write_bytes(SRC_FASIL.read_bytes())
+    (directory / "yasa_2024_42_sample.html").write_bytes(SRC_YASA.read_bytes())
+    return directory
+
+
+def test_render_corpus_json_sets_cutoff_and_future_flag() -> None:
+    out = render_corpus_json(
+        '{"history": "current-only", "checked_on": "2026-11-02"}\n',
+        cutoff="2026-11-03",
+        has_future_branch=True,
+    )
+    assert out == (
+        '{\n  "checked_on": "2026-11-03",\n  "has_future_branch": true,\n'
+        '  "history": "current-only"\n}\n'
+    )
+
+
+def test_build_with_cutoff_splits_future_and_filters_stats(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    repo = tmp_path / "repo"
+    summary = CorpusBuilder(
+        repo, amendment_dates=BUILD_AMENDMENTS, cutoff="2026-11-02"
+    ).build_from_dir(src)
+    engine = DeterministicGitEngine(repo, initialize=False)
+    assert summary.cutoff == "2026-11-02"
+    assert summary.future_sha is not None
+    assert summary.head_sha == engine.rev_parse("refs/heads/main")
+    assert summary.future_sha == engine.rev_parse("refs/heads/future")
+    root = engine.root_commit()
+    corpus = json.loads(engine.read_file_at_commit("corpus.json", root) or "")
+    assert corpus["checked_on"] == "2026-11-02"
+    assert corpus["has_future_branch"] is True
+    stats_md = engine.read_file_at_commit("STATS.md", root) or ""
+    future_count = len(engine.list_commits(summary.future_sha)) - len(
+        engine.list_commits(summary.head_sha)
+    )
+    assert future_count >= 1
+    assert f"| Tarihsel commit | {summary.commit_count - future_count} |" in stats_md
+    assert "| Son yürürlük tarihi | 2026-12-01 |" not in stats_md
+    assert "| Son yürürlük tarihi | 2024-03-15 |" in stats_md
+
+
+def test_build_twice_with_same_cutoff_is_identical(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    first = CorpusBuilder(
+        tmp_path / "a", amendment_dates=BUILD_AMENDMENTS, cutoff="2026-11-02"
+    ).build_from_dir(src)
+    second = CorpusBuilder(
+        tmp_path / "b", amendment_dates=BUILD_AMENDMENTS, cutoff="2026-11-02"
+    ).build_from_dir(src)
+    assert (first.head_sha, first.future_sha) == (second.head_sha, second.future_sha)
+
+
+def test_build_defaults_cutoff_to_corpus_checked_on(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    summary = CorpusBuilder(tmp_path / "r", amendment_dates=BUILD_AMENDMENTS).build_from_dir(src)
+    assert summary.cutoff == "2026-11-02"
+    assert summary.future_sha is not None
+
+
+def test_build_without_future_flags_false(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    repo = tmp_path / "r"
+    summary = CorpusBuilder(
+        repo, amendment_dates=BUILD_AMENDMENTS, cutoff="2027-01-01"
+    ).build_from_dir(src)
+    engine = DeterministicGitEngine(repo, initialize=False)
+    assert summary.future_sha is None
+    corpus = json.loads(engine.read_file_at_commit("corpus.json", engine.root_commit()) or "")
+    assert corpus["has_future_branch"] is False
+
+
+def test_build_rejects_cutoff_before_all_laws(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    repo = tmp_path / "repo"
+    with pytest.raises(ValueError):
+        CorpusBuilder(repo, cutoff="1800-01-01").build_from_dir(src)
+    assert not DeterministicGitEngine(repo).has_commits()
+
+
+def test_builder_rejects_missing_or_invalid_cutoff(tmp_path: Path) -> None:
+    bad = tmp_path / "corpus.json"
+    bad.write_text('{"history": "x"}\n', encoding="utf-8")
+    with pytest.raises(ValueError):
+        CorpusBuilder(tmp_path / "r", corpus_path=bad)
+    with pytest.raises(ValueError):
+        CorpusBuilder(tmp_path / "r", cutoff="2026/11/02")
+
+
+def test_build_cli_rejects_malformed_cutoff(tmp_path: Path) -> None:
+    src = _build_sources(tmp_path / "src")
+    result = CliRunner().invoke(
+        build_app,
+        ["--repo-path", str(tmp_path / "r"), "--from-dir", str(src), "--cutoff", "2026/11/02"],
+    )
+    assert result.exit_code != 0

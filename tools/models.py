@@ -874,6 +874,8 @@ class BuildSummary(BaseModel):
     article_count: int = Field(ge=0)
     commit_count: int = Field(ge=0)
     head_sha: str
+    cutoff: str
+    future_sha: str | None = None
     skipped_laws: list[SkippedLaw] = Field(default_factory=list)
 
     @field_validator("head_sha")
