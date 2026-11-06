@@ -98,6 +98,8 @@ def _plan(law_id: str, effective_date: str) -> LegislativeCommitPlan:
             f"laws/{law_id}/metadata.json": "{}\n",
         },
         tag_name=f"v{effective_date}",
+        law=law_id,
+        kind="baseline",
     )
 
 

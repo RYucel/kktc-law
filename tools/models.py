@@ -32,6 +32,7 @@ __all__ = [
     "BuildSummary",
     "CacheManifest",
     "CachedDocument",
+    "CommitKind",
     "CorpusStatistics",
     "DateSource",
     "FileChange",
@@ -57,6 +58,7 @@ __all__ = [
 ]
 
 LawType = Literal["fasil", "yasa", "anayasa"]
+CommitKind = Literal["baseline", "law"]
 DateSource = Literal["explicit", "override", "fallback_1959", "fallback_law_year"]
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -526,6 +528,8 @@ class LegislativeCommitPlan(BaseModel):
     author_name: str = Field(min_length=1)
     commit_message: str = Field(min_length=1)
     file_changes: dict[str, str]
+    law: str = Field(min_length=1)
+    kind: CommitKind
     tag_name: str | None = None
     amending_law: str | None = None
     affected_articles: list[str] = Field(default_factory=list)
@@ -559,6 +563,8 @@ class LegislativeCommitPlan(BaseModel):
             commit_message=self.commit_message,
             file_changes=dict(self.file_changes),
             tag_name=self.tag_name,
+            law=self.law,
+            kind=self.kind,
         )
 
 

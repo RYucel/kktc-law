@@ -1205,6 +1205,8 @@ def build_chronological_commits(
                 f"{header.law_id}: {resolved_original} — ilk yürürlük ({title})"
             ),
             file_changes=_sorted_file_changes(root_files),
+            law=f"{header.law_id} {header.title}".strip(),
+            kind="baseline",
             tag_name=f"v{resolved_original}",
         )
     ]
@@ -1247,6 +1249,8 @@ def build_chronological_commits(
                 author_name=DEFAULT_AUTHOR_NAME,
                 commit_message=message,
                 file_changes=_sorted_file_changes(files),
+                law=reference,
+                kind="law",
                 tag_name=f"v{effective}",
                 amending_law=reference,
                 affected_articles=article_ids,
