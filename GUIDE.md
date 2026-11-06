@@ -513,7 +513,11 @@ Metadata değişikliklerinden doğan mantıksal madde güncellemeleri de eklenir
 - `build_dashboard(engine, output_dir)` → `index.html`
 
 İçerik: özet kartları, tür dağılımı, tarih kaynakları, on yıllık commit grafiği,
-en çok değişen yasalar/maddeler, aranabilir yasa tablosu, son commit'ler.
+en çok değişen yasalar/maddeler, aranabilir yasa tablosu, son commit'ler ve
+**madde metni git diff görünümü**.
+
+Diff görünümü, son commit'lerde eklenen/değişen/silinen madde metinlerini kırmızı/yeşil
+satırlarla ve yasa/madde/commit konusunda arama filtresiyle gösterir.
 
 GitHub Pages: <https://ryucel.github.io/kktc-law/>
 

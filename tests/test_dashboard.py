@@ -61,3 +61,39 @@ def test_dashboard_cli(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
     assert (tmp_path / "site" / "index.html").is_file()
+
+
+def test_dashboard_renders_git_diff_view(tmp_path: Path) -> None:
+    engine = DeterministicGitEngine(tmp_path / "diff-repo")
+    metadata = (
+        '{"law_id":"fasil-1","type":"fasil","number":"1","title":"Test",'
+        '"original_date":"1950-01-01","date_source":"explicit",'
+        '"consolidation_history":[]}\n'
+    )
+    engine.apply_legislative_commit(
+        effective_date="1950-01-01",
+        author_name="Test",
+        commit_message="fasil-1: 1950-01-01 — ilk yürürlük (Test)",
+        file_changes={
+            "laws/fasil-1/metadata.json": metadata,
+            "laws/fasil-1/madde-001.md": "# Madde 1: Test\n\nEski metin.\n",
+        },
+        law="fasil-1 Test",
+        kind="baseline",
+    )
+    engine.apply_legislative_commit(
+        effective_date="1960-01-01",
+        author_name="Test",
+        commit_message="fasil-1: 1960-01-01 — 1/1960 (madde-001)",
+        file_changes={
+            "laws/fasil-1/madde-001.md": "# Madde 1: Test\n\nYeni metin.\n",
+        },
+        law="1/1960",
+        kind="law",
+    )
+
+    html = render_dashboard(engine)
+    assert "Madde metni değişiklikleri" in html
+    assert "diff-add" in html
+    assert "diff-del" in html
+    assert "Yeni metin." in html

@@ -173,7 +173,7 @@ def _checked_on_from(corpus_text: str) -> str:
 
 
 def render_corpus_json(corpus_text: str, *, cutoff: str, has_future_branch: bool) -> str:
-    """Kök `corpus.json` alanlarını koruyup `checked_on` ve `has_future_branch` değerlerini yazar."""
+    """Korunan korpus alanlarına `checked_on` ve `has_future_branch` ekler."""
     payload = json.loads(corpus_text)
     if not isinstance(payload, dict):
         raise ValueError("corpus.json bir JSON nesnesi olmalıdır")

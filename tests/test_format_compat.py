@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from tools.build_corpus import CorpusBuilder, app as build_app, render_corpus_json
-
+from tools.build_corpus import CorpusBuilder, render_corpus_json
+from tools.build_corpus import app as build_app
 from tools.git_engine import (
     COLONIAL_AUTHOR_NAME,
     DEFAULT_AUTHOR_NAME,

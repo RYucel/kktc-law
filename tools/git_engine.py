@@ -19,7 +19,7 @@ import re
 import subprocess
 import unicodedata
 from collections.abc import Sequence
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path, PurePosixPath
 from typing import Any, Final
 
@@ -821,6 +821,17 @@ class DeterministicGitEngine:
         result = self._run_git(["show", "-s", "--format=%an", commit_sha])
         return self._decode(result.stdout).strip()
 
+    def parent_commit(self, commit_sha: str = "HEAD") -> str | None:
+        """Commit'in ilk ebeveyn SHA-1'ini, yoksa `None` döndürür."""
+        result = self._run_git(
+            ["show", "-s", "--format=%P", commit_sha],
+            allow_failure=True,
+        )
+        if result.returncode != 0:
+            return None
+        parents = self._decode(result.stdout).split()
+        return parents[0] if parents else None
+
     def changed_files_between(
         self,
         from_sha: str,
@@ -934,11 +945,11 @@ class DeterministicGitEngine:
         if self.has_commits():
             result = self._run_git(["log", "-1", "--format=%cI", "HEAD"])
             parent = datetime.fromisoformat(self._decode(result.stdout).strip()).astimezone(
-                timezone.utc
+                UTC
             )
         if iso_date < GIT_EPOCH_DATE:
             stamp = (
-                datetime(1970, 1, 1, tzinfo=timezone.utc)
+                datetime(1970, 1, 1, tzinfo=UTC)
                 if parent is None
                 else parent + timedelta(seconds=1)
             )

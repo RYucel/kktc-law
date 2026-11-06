@@ -67,6 +67,21 @@ tr:hover td { background:#f8fafc; }
   font-weight:700; color:#fff; }
 .badge-anayasa { background:#0ea5a4; } .badge-fasil { background:#2563eb; }
 .badge-yasa { background:#d97706; }
+.diff-card { border:1px solid var(--line); border-radius:10px; margin:10px 0;
+  background:#fbfdff; overflow:hidden; }
+.diff-card summary { cursor:pointer; padding:10px 12px; display:flex; gap:10px;
+  align-items:center; flex-wrap:wrap; }
+.diff-card summary strong { font-size:13px; }
+.diff-date, .diff-sha { color:var(--muted); font-size:11px; font-family:ui-monospace,monospace; }
+.diff-subject { color:#475569; font-size:12px; flex:1; min-width:180px; }
+.diff-body { border-top:1px solid var(--line); padding:10px 12px; overflow:auto;
+  background:#fff; font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.diff-body span { display:block; white-space:pre-wrap; padding:0 5px; min-height:1.5em; }
+.diff-add { background:#e8f8ee; color:#166534; }
+.diff-del { background:#fdecec; color:#991b1b; }
+.diff-hunk { background:#eff6ff; color:#1d4ed8; margin-top:5px; }
+.diff-meta { color:#64748b; font-style:italic; }
+.diff-context { color:#334155; }
 .toolbar { display:flex; justify-content:space-between; gap:12px; align-items:center;
   margin-bottom:10px; flex-wrap:wrap; }
 input[type=search] { border:1px solid var(--line); border-radius:9px; padding:9px 12px;
@@ -143,6 +158,300 @@ footer { color:var(--muted); font-size:12px; text-align:center; padding:24px; }
       <tbody><tr><td>2026-01-01</td><td><code>9454dad8</code></td><td>fasil-155</td><td>fasil-155: 2026-01-01 — 32/2026 (madde-001, madde-160, madde-174, madde-175, madde-176)</td></tr><tr><td>2026-01-01</td><td><code>1a443147</code></td><td>fasil-154</td><td>fasil-154: 2026-01-01 — 24/2026 (madde-113)</td></tr><tr><td>2026-01-01</td><td><code>72d72a12</code></td><td>fasil-138</td><td>fasil-138: 2026-01-01 — 14/2026 (madde-001, madde-011, madde-012)</td></tr><tr><td>2026-01-01</td><td><code>c72f53c6</code></td><td>fasil-105</td><td>fasil-105: 2026-01-01 — 44/2026 (madde-003, madde-005)</td></tr><tr><td>2026-01-01</td><td><code>d7b17a67</code></td><td>fasil-105</td><td>fasil-105: 2026-01-01 — 27/2026 (gecici-madde-001)</td></tr><tr><td>2025-01-01</td><td><code>0aa0b847</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2025-01-01 — 9/2025 (madde-021)</td></tr><tr><td>2025-01-01</td><td><code>4d85f63e</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2025-01-01 — 14/2025 (madde-013)</td></tr><tr><td>2025-01-01</td><td><code>6934ff0e</code></td><td>fasil-154</td><td>fasil-154: 2025-01-01 — 17/2025 (madde-001, madde-002, madde-003, madde-171, madde-215, madde-311)</td></tr><tr><td>2025-01-01</td><td><code>9bfdd7ae</code></td><td>fasil-105</td><td>fasil-105: 2025-01-01 — 25/2025 (gecici-madde-001)</td></tr><tr><td>2024-01-01</td><td><code>ec71bb7b</code></td><td>yasa-2024-53</td><td>yasa-2024-53: 2024-01-01 — 53/2024 (madde-042)</td></tr><tr><td>2024-01-01</td><td><code>0fd704bd</code></td><td>yasa-2024-53</td><td>yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</td></tr><tr><td>2024-01-01</td><td><code>605a6a4d</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 9/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>a25d6eab</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 5/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>ea51a409</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 49/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>8ffc9776</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — 28/2024 (madde-021)</td></tr><tr><td>2024-01-01</td><td><code>f6e3c6dc</code></td><td>yasa-2024-49</td><td>yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</td></tr><tr><td>2024-01-01</td><td><code>b1321b0f</code></td><td>fasil-154</td><td>fasil-154: 2024-01-01 — 65/2024 (madde-207)</td></tr><tr><td>2024-01-01</td><td><code>689c8dc6</code></td><td>fasil-149</td><td>fasil-149: 2024-01-01 — 41/2024 (madde-010)</td></tr><tr><td>2024-01-01</td><td><code>83c4b572</code></td><td>fasil-105</td><td>fasil-105: 2024-01-01 — 61/2024 (gecici-madde-001, gecici-madde-025, madde-003)</td></tr><tr><td>2023-06-26</td><td><code>efcc7fdd</code></td><td>yasa-2023-38</td><td>yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</td></tr><tr><td>2022-06-27</td><td><code>159a66ef</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2022-06-27 — 10/2022 (madde-013)</td></tr><tr><td>2022-06-27</td><td><code>9643c62f</code></td><td>yasa-2022-10</td><td>yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</td></tr><tr><td>2022-01-01</td><td><code>0e6d56ef</code></td><td>fasil-105</td><td>fasil-105: 2022-01-01 — 25/2022 (gecici-madde-001)</td></tr><tr><td>2021-01-01</td><td><code>64e1fb57</code></td><td>fasil-105</td><td>fasil-105: 2021-01-01 — 18/2021 (gecici-madde-001, gecici-madde-025)</td></tr><tr><td>2020-06-29</td><td><code>447a1efb</code></td><td>yasa-2020-31</td><td>yasa-2020-31: 2020-06-29 — 31/2020 (madde-026)</td></tr></tbody></table>
     </div>
   </section>
+
+  <section class="panel" style="margin-top:18px">
+    <h2>Madde metni değişiklikleri <span>git diff görünümü</span></h2>
+    <p class="muted">Son commit'lerde eklenen, değişen veya silinen madde metinleri.
+    Kırmızı satırlar eski, yeşil satırlar yeni metindir.</p>
+    <div class="toolbar"><input id="diff-search" type="search" placeholder="Yasa, madde veya commit konusunda ara…"></div><div id="diff-list"><details class="diff-card" data-search="yasa-2024-53 gecici-madde-001 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / gecici-madde-001</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/gecici-madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/gecici-madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Geçici Madde 1</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Denetçi Olma Koşullarını Taşıyan Kamu Sağlık Çalışanı ve/veya Kamu Görevlisinin Bulunmaması Halinde Denetçi Görevlendirilmesi</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-001 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-001</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 1: Kısa İsim</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-002 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-002</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 2: Tefsir</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-003 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-003</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-003.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 3: Amaç</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-004 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-004</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-004.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-004.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 4: Kapsam</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-005 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-005</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-005.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1,7 @@</span>
+<span class="diff-add">+# Madde 5: Tedarikçilerin İhtiyatlı Olma Sorumluluğu</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Tedarikçilerin İhtiyatlı Olma Sorumluluğu</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İKİNCİ KISIM Güvenli Kullanım, Kimyasal Güvenliği ve Muafiyetler</span>
+<span class="diff-add">+İKİNCİ KISIM Güvenli Kullanım, Kimyasal Güvenliği ve Muafiyetler</span>
+<span class="diff-add">+İKİNCİ KISIM Güvenli Kullanım, Kimyasal Güvenliği ve Muafiyetler</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-006 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-006</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-006.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 6: Tehlikeli Kimyasalların Güvenli Kullanımı</span></div></details><details class="diff-card" data-search="yasa-2024-53 madde-007 yasa-2024-53: 2024-01-01 — ilk yürürlük (kimyasallar yasası)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-53 / madde-007</strong><span class="diff-subject">yasa-2024-53: 2024-01-01 — ilk yürürlük (Kimyasallar Yasası)</span><span class="diff-sha">0fd704bd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-53/madde-007.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-53/madde-007.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 7: Kimyasal Güvenliği</span></div></details><details class="diff-card" data-search="yasa-2024-49 gecici-madde-001 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / gecici-madde-001</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/gecici-madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/gecici-madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Geçici Madde 1: Atamanın Geçerli Sayılması</span></div></details><details class="diff-card" data-search="yasa-2024-49 gecici-madde-002 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / gecici-madde-002</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/gecici-madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/gecici-madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Geçici Madde 2: İlk Uygulamada İzlenecek Yöntem</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-001 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-001</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 1</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-002 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-002</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 2: Kısa İsim BİRİNCİ KISIM Genel Kurallar BİRİNCİ KISIM Genel Kurallar BİRİNCİ KISIM Genel Kurallar BİRİNCİ KISIM Genel Kurallar</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-003 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-003</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-003.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1,8 @@</span>
+<span class="diff-add">+# Madde 3: Amaç ve Kapsam</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Amaç ve Kapsam</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İKİNCİ KISIM Başbakanlık Merkez Kuruluşu ve Başbakanlık Makamı</span>
+<span class="diff-add">+İKİNCİ KISIM Başbakanlık Merkez Kuruluşu ve Başbakanlık Makamı</span>
+<span class="diff-add">+İKİNCİ KISIM Başbakanlık Merkez Kuruluşu ve Başbakanlık Makamı</span>
+<span class="diff-add">+İKİNCİ KISIM Başbakanlık Merkez Kuruluşu ve Başbakanlık Makamı</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-004 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-004</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-004.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-004.md</span>
+<span class="diff-hunk">@@ -0,0 +1,4 @@</span>
+<span class="diff-add">+# Madde 4: Başbakanlık Merkez Kuruluşunun Oluşumu, Görev ve Yetkileri</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Başbakanlık Merkez Kuruluşunun Oluşumu, Görev ve Yetkileri</span>
+<span class="diff-add">+Başbakanlık Merkez Kuruluşunun Oluşumu, Görev ve Yetkileri</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-005 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-005</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-005.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 5: Başbakanın Görev ve Yetkileri</span></div></details><details class="diff-card" data-search="yasa-2024-49 madde-006 yasa-2024-49: 2024-01-01 — ilk yürürlük (başbakanlık ve merkez kuruluşu)"><summary><span class="diff-date">2024-01-01</span><strong>yasa-2024-49 / madde-006</strong><span class="diff-subject">yasa-2024-49: 2024-01-01 — ilk yürürlük (Başbakanlık VE Merkez Kuruluşu)</span><span class="diff-sha">f6e3c6dc</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2024-49/madde-006.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2024-49/madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1,4 @@</span>
+<span class="diff-add">+# Madde 6: Başbakanlık Dairesi Müdürlüğünün Oluşumu, Görev ve Yetkileri</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Başbakanlık Dairesi Müdürlüğünün Oluşumu, Görev ve Yetkileri</span>
+<span class="diff-add">+Başbakanlık Dairesi Müdürlüğünün Oluşumu, Görev ve Yetkileri</span></div></details><details class="diff-card" data-search="yasa-2023-38 gecici-madde-001 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / gecici-madde-001</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/gecici-madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/gecici-madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Geçici Madde 1: Tüzük Yapma Yetkisi</span></div></details><details class="diff-card" data-search="yasa-2023-38 gecici-madde-002 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / gecici-madde-002</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/gecici-madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/gecici-madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Geçici Madde 2: Tüzüklerin Yayımlanması</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İşletmelerin Kayıt veya İzin İşlemlerinin Yaptırılmasına İlişkin Kural</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-001 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-001</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 1: Kısa İsim</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-002 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-002</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 2: BİRİNCİ KISIM Genel Kurallar</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-003 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-003</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-003.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 3: Tefsir</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-004 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-004</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-004.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-004.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Madde 4: Kapsam</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İKİNCİ KISIM Zeytin Ağacı Varlığının Korunması ve Islahı İle Zeytin ve Zeytin Ürünlerinin Piyasaya Arz Koşulları</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-005 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-005</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-005.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Madde 5</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Zeytin Ağacı Varlığının Korunması ve Islahı</span></div></details><details class="diff-card" data-search="yasa-2023-38 madde-006 yasa-2023-38: 2023-06-26 — ilk yürürlük (sayı: zeytin ve zeytin ürünleri yasası i̇çdüzeni)"><summary><span class="diff-date">2023-06-26</span><strong>yasa-2023-38 / madde-006</strong><span class="diff-subject">yasa-2023-38: 2023-06-26 — ilk yürürlük (Sayı: Zeytin VE Zeytin Ürünleri Yasası İçdüzeni)</span><span class="diff-sha">efcc7fdd</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2023-38/madde-006.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2023-38/madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1,5 @@</span>
+<span class="diff-add">+# Madde 6</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Gıda Güvenliği ve Zeytin ve Zeytin Ürünlerinin Piyasaya Arz Koşulları</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+ÜÇÜNCÜ KISIM Zeytin İşletmecilerinin Sorumlulukları ve Yükümlülükleri ile Zeytin ve Zeytin Ürünlerinin Sınıflandırılması</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-001 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-001</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 1: Kısa İsim</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-002 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-002</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1,9 @@</span>
+<span class="diff-add">+# Madde 2: Tefsir</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Tefsir</span>
+<span class="diff-add">+Tefsir</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İKİNCİ KISIM Alkol ve/veya Uyuşturucu Madde Etkisi Altında Araç Kullanımı İle İlgili Kurallar</span>
+<span class="diff-add">+İKİNCİ KISIM Alkol ve/veya Uyuşturucu Madde Etkisi Altında Araç Kullanımı İle İlgili Kurallar</span>
+<span class="diff-add">+İKİNCİ KISIM Alkol ve/veya Uyuşturucu Madde Etkisi Altında Araç Kullanımı İle İlgili Kurallar</span>
+<span class="diff-add">+İKİNCİ KISIM Alkol ve/veya Uyuşturucu Madde Etkisi Altında Araç Kullanımı İle İlgili Kurallar</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-003 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-003</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-003.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1,5 @@</span>
+<span class="diff-add">+# Madde 3</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Alkollü veya Uyuşturucu Madde Tesiri Altında Araç Kullanma Yasağı</span>
+<span class="diff-add">+Alkollü veya Uyuşturucu Madde Tesiri Altında Araç Kullanma Yasağı</span>
+<span class="diff-add">+Alkollü veya Uyuşturucu Madde Tesiri Altında Araç Kullanma Yasağı</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-004 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-004</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-004.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-004.md</span>
+<span class="diff-hunk">@@ -0,0 +1,4 @@</span>
+<span class="diff-add">+# Madde 4: İlk Analiz İçin Nefes veya Tükürük Örneği Alınması</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İlk Analiz İçin Nefes veya Tükürük Örneği Alınması</span>
+<span class="diff-add">+İlk Analiz İçin Nefes veya Tükürük Örneği Alınması</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-005 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-005</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-005.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1,5 @@</span>
+<span class="diff-add">+# Madde 5</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Son Analiz İçin Nefes veya Laboratuvar Analizi İçin Biyolojik Örnek Alınması</span>
+<span class="diff-add">+Son Analiz İçin Nefes veya Laboratuvar Analizi İçin Biyolojik Örnek Alınması</span>
+<span class="diff-add">+Son Analiz İçin Nefes veya Laboratuvar Analizi İçin Biyolojik Örnek Alınması</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-006 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-006</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-006.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1,5 @@</span>
+<span class="diff-add">+# Madde 6</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Nefes Örneği veya Biyolojik Örnek Vermeyi Reddetmek İçin Makul Sebep</span>
+<span class="diff-add">+Nefes Örneği veya Biyolojik Örnek Vermeyi Reddetmek İçin Makul Sebep</span>
+<span class="diff-add">+Nefes Örneği veya Biyolojik Örnek Vermeyi Reddetmek İçin Makul Sebep</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-007 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-007</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-007.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-007.md</span>
+<span class="diff-hunk">@@ -0,0 +1,4 @@</span>
+<span class="diff-add">+# Madde 7: Tıbbi Tedavi Görmek Amacıyla Hastanede Bulunan Kişilerin Korunması</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Tıbbi Tedavi Görmek Amacıyla Hastanede Bulunan Kişilerin Korunması</span>
+<span class="diff-add">+Tıbbi Tedavi Görmek Amacıyla Hastanede Bulunan Kişilerin Korunması</span></div></details><details class="diff-card" data-search="yasa-2022-10 madde-008 yasa-2022-10: 2022-06-27 — ilk yürürlük (yol güvenliği yasası)"><summary><span class="diff-date">2022-06-27</span><strong>yasa-2022-10 / madde-008</strong><span class="diff-subject">yasa-2022-10: 2022-06-27 — ilk yürürlük (YOL Güvenliği Yasası)</span><span class="diff-sha">9643c62f</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2022-10/madde-008.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2022-10/madde-008.md</span>
+<span class="diff-hunk">@@ -0,0 +1,5 @@</span>
+<span class="diff-add">+# Madde 8</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Sanığın Vücudundaki Alkol Miktarı ile Uyuşturucu Madde Türünün İspatı</span>
+<span class="diff-add">+Sanığın Vücudundaki Alkol Miktarı ile Uyuşturucu Madde Türünün İspatı</span>
+<span class="diff-add">+Sanığın Vücudundaki Alkol Miktarı ile Uyuşturucu Madde Türünün İspatı</span></div></details><details class="diff-card" data-search="yasa-2020-31 gecici-madde-001 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / gecici-madde-001</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/gecici-madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/gecici-madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Geçici Madde 1: DOKUZUNCU KISIM Geçici Kurallar</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Bu Yasanın Yürürlüğe Girdiği Tarihten Önce Akdolunmuş Tüketici Kredi Sözleşmelerine İlişkin Kural</span></div></details><details class="diff-card" data-search="yasa-2020-31 gecici-madde-002 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / gecici-madde-002</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/gecici-madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/gecici-madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Geçici Madde 2: Geçici 1’inci Maddeye Aykırılık Halinde Verilecek Ceza</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-001 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-001</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-001.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-001.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 1</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-002 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-002</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-002.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-002.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 2: Kısa İsim</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-003 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-003</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-003.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 3: Tefsir</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-004 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-004</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-004.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-004.md</span>
+<span class="diff-hunk">@@ -0,0 +1,3 @@</span>
+<span class="diff-add">+# Madde 4: Kapsam</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+İKİNCİ KISIM Tüketici Kredi Sözleşmelerinin Esas ve Usulleri</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-005 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-005</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-005.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 5</span></div></details><details class="diff-card" data-search="yasa-2020-31 madde-006 yasa-2020-31: 2020-06-29 — ilk yürürlük (tüketici kredileri yasası i̇çdüzeni)"><summary><span class="diff-date">2020-06-29</span><strong>yasa-2020-31 / madde-006</strong><span class="diff-subject">yasa-2020-31: 2020-06-29 — ilk yürürlük (Tüketici Kredileri Yasası İçdüzeni)</span><span class="diff-sha">bf762ba9</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/yasa-2020-31/madde-006.md</span>
+<span class="diff-meta">+++ b/laws/yasa-2020-31/madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1 @@</span>
+<span class="diff-add">+# Madde 6: Tüketici Kredi Sözleşmeleri</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-003 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-003</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-003.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-003.md</span>
+<span class="diff-hunk">@@ -0,0 +1,22 @@</span>
+<span class="diff-add">+# Geçici Madde 3: Orman Tarlaları</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+(1) Bu Anayasanın 159. maddesinin (2). fıkrası</span>
+<span class="diff-add">+kurallarına bakılmaksızın, alçak orman bölgelerinde</span>
+<span class="diff-add">+ormantarlası olarak anılan ve 1 Ocak 1955&#x27;ten beri tarım arazisi</span>
+<span class="diff-add">+olarak kullanılan Devlet arazilerinin mülkiyet hakkının fiili</span>
+<span class="diff-add">+zilyedlerine devri mümkündür.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Bu fıkra amaçları bakımından fiili zilyed,</span>
+<span class="diff-add">+taşınmaz malı tarım arazisi haline getiren ve 1 Ocak</span>
+<span class="diff-add">+1955&#x27;ten beri kullanmayı sürdüren kişiyi anlatır ve yasal</span>
+<span class="diff-add">+mirasçıları ile bunlardan devralan kişiyi de kapsar.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Bu fıkranın uygulanması yasa ile düzenlenir.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+(2) (1). fıkrada belirtilen statü içinde olup 20 Temmuz 1974</span>
+<span class="diff-add">+tarihine kadar Kıbrıs Türk toplumu mensubu olmayan kişilerin</span>
+<span class="diff-add">+fiili zilyedliğinde bulunan Devlet arazilerinin geleceği yasa ile</span>
+<span class="diff-add">+düzenlenir.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Mevcut</span>
+<span class="diff-add">+Mevzuatın Geçerliliği ve Bu Mevzuatın Anayasaya</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-005 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-005</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-005.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-005.md</span>
+<span class="diff-hunk">@@ -0,0 +1,11 @@</span>
+<span class="diff-add">+# Geçici Madde 5: Bu Anayasa,</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+halkoylamasında kabul edilip Resmi Gazete&#x27;de yayımlanarak</span>
+<span class="diff-add">+yürürlüğe girdikten sonra, Kuzey Kıbrıs Türk Cumhuriyeti Kurucu</span>
+<span class="diff-add">+Meclisinin karara bağladığı tarihte Cumhuriyet Meclisi</span>
+<span class="diff-add">+seçimi yapılır. Sözkonusu gün, seçim işlemleri</span>
+<span class="diff-add">+bakımından oy verme günüdür. Diğer seçim işlerinin</span>
+<span class="diff-add">+tarihleri Yüksek Seçim Kurulunca saptanır.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Cumhurbaşkanının</span>
+<span class="diff-add">+Seçimi ve Eski Cumhurbaşkanının Görevinin Sona Ermesi</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-006 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-006</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-006.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-006.md</span>
+<span class="diff-hunk">@@ -0,0 +1,16 @@</span>
+<span class="diff-add">+# Geçici Madde 6: Bu Anayasaya göre</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+ilk Cumhurbaşkanlığı seçimi, Cumhuriyet Meclisi</span>
+<span class="diff-add">+seçimleriyle birlikte aynı gün yapılır ve seçilen</span>
+<span class="diff-add">+Cumhurbaşkanı, Cumhuriyet Meclisinin toplanıp göreve</span>
+<span class="diff-add">+başladığı günü izleyen gün Mecliste andiçerek göreve</span>
+<span class="diff-add">+başlar. Seçilen Cumhurbaşkanı, göreve</span>
+<span class="diff-add">+başladığı anda da eski Cumhurbaşkanının</span>
+<span class="diff-add">+görevi sona erer.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Ancak, Kurucu Meclis</span>
+<span class="diff-add">+koşulların gerektirdiği hallerde,</span>
+<span class="diff-add">+Cumhurbaşkanlığı seçiminin değişik bir günde</span>
+<span class="diff-add">+yapılmasını karara bağlayabilir.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Kurucu Meclisin Hukuki Varlığının Sona Ermesi</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-007 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-007</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-007.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-007.md</span>
+<span class="diff-hunk">@@ -0,0 +1,6 @@</span>
+<span class="diff-add">+# Geçici Madde 7: Bu Anayasaya göre</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+kurulan Cumhuriyet Meclisinin toplanmasıyla 2 Aralık 1983 tarihli ve</span>
+<span class="diff-add">+3 sayılı Meclis Kararı ile oluşturulan Kurucu Meclisin</span>
+<span class="diff-add">+hukuki varlığı sona erer ve kendiliğinden dağılmış</span>
+<span class="diff-add">+olur.</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-008 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-008</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-008.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-008.md</span>
+<span class="diff-hunk">@@ -0,0 +1,6 @@</span>
+<span class="diff-add">+# Geçici Madde 8: Bu Anayasaya</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+göre kurulan Cumhuriyet Meclisinin toplantı ve çalışmaları</span>
+<span class="diff-add">+için, kendi İçtüzüğü yapılıncaya kadar, Kıbrıs</span>
+<span class="diff-add">+Türk Federe Meclisi İçtüzüğünün, bu Anayasaya aykırı</span>
+<span class="diff-add">+olmayan kuralları uygulanır.</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-009 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-009</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-009.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-009.md</span>
+<span class="diff-hunk">@@ -0,0 +1,6 @@</span>
+<span class="diff-add">+# Geçici Madde 9: Bakanlar Kurulunun Durumu</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Bu Anayasanın</span>
+<span class="diff-add">+106. maddesine göre yeni Bakanlar Kurulu Cumhurbaşkanınca</span>
+<span class="diff-add">+atandığı zaman, mevcut Bakanlar Kurulunun görevi</span>
+<span class="diff-add">+kendiliğinden sona erer.</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-010 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-010</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-010.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-010.md</span>
+<span class="diff-hunk">@@ -0,0 +1,12 @@</span>
+<span class="diff-add">+# Geçici Madde 10: Kıbrıs Türk</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+halkının savunması ve iç güvenliği ile milletlerarası</span>
+<span class="diff-add">+durum gerektirdiği sürece bu Anayasanın 117. maddesinde yer alan</span>
+<span class="diff-add">+kurallar yürürlüğe girmez. Anayasa yürürlüğe girdiği tarihte</span>
+<span class="diff-add">+dış ve iç güvenliğin sağlanmasında kullanılan</span>
+<span class="diff-add">+bütün kuvvetlerle, bunlara ilişkin olarak uygulamada olan usul ve hükümlerin</span>
+<span class="diff-add">+ve bu konularda kabul edilmiş ve edilecek işbirliği</span>
+<span class="diff-add">+esaslarının uygulanmasına devam olunur.</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+Anayasanın</span>
+<span class="diff-add">+Kabul Ettiği Organ, Kurum ve Kurulların Durumu</span></div></details><details class="diff-card" data-search="anayasa gecici-madde-011 anayasa: 1985-05-05 — ilk yürürlük (kuzey kıbrıs türk cumhuriyeti anayasası)"><summary><span class="diff-date">1985-05-05</span><strong>anayasa / gecici-madde-011</strong><span class="diff-subject">anayasa: 1985-05-05 — ilk yürürlük (Kuzey Kıbrıs Türk Cumhuriyeti Anayasası)</span><span class="diff-sha">0c28d446</span></summary><div class="diff-body"><span class="diff-meta">--- a/laws/anayasa/gecici-madde-011.md</span>
+<span class="diff-meta">+++ b/laws/anayasa/gecici-madde-011.md</span>
+<span class="diff-hunk">@@ -0,0 +1,7 @@</span>
+<span class="diff-add">+# Geçici Madde 11: Bu Anayasa ile</span>
+<span class="diff-add">+</span>
+<span class="diff-add">+kabul edilmiş olan yeni organ, kurum ve kurulların kuruluş ve</span>
+<span class="diff-add">+işleyişleriyle ilgili yasalar Cumhuriyet Meclisince kabul edilip</span>
+<span class="diff-add">+yürürlüğe konuncaya kadar, bu konularda mevcut mevzuat</span>
+<span class="diff-add">+kurallarının uygulanmasına devam edilir ve mevcut organ, kurum</span>
+<span class="diff-add">+ve kurullar görevlerine devam ederler.</span></div></details></div>
+  </section>
 </main>
 <footer>kktc-law · deterministik Git külliyatı · bu sayfa dış servis kullanmaz</footer>
 <script>
@@ -153,6 +462,15 @@ search.addEventListener('input', () => {
     row.style.display = row.dataset.search.includes(q) ? '' : 'none';
   });
 });
+const diffSearch = document.getElementById('diff-search');
+if (diffSearch) {
+  diffSearch.addEventListener('input', () => {
+    const q = diffSearch.value.toLocaleLowerCase('tr');
+    document.querySelectorAll('#diff-list .diff-card').forEach(card => {
+      card.style.display = card.dataset.search.includes(q) ? '' : 'none';
+    });
+  });
+}
 </script>
 </body>
 </html>
