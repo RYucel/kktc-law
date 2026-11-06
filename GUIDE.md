@@ -520,6 +520,10 @@ Diff görünümü, değişen yasanın tüm maddelerini tek bir tam metin halinde
 önceki/yeni sürümü yan yana gösterir. Kırmızı satırlar eski, yeşil satırlar yeni metindir;
 yasa veya commit konusunda arama yapılabilir.
 
+Yasalar tablosundaki her satır ve “Geçmiş →” bağlantısı, o yasaya özel
+`laws/<law_id>.html` sayfasını açar. Bu sayfa yasanın **tüm commit geçmişini** ve mevcut
+tam metin farklarını tek görünümde gösterir; kullanıcı değişiklikleri aramak zorunda kalmaz.
+
 GitHub Pages: <https://ryucel.github.io/kktc-law/>
 
 ---

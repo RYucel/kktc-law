@@ -108,12 +108,13 @@ def _law_rows(laws) -> str:
         titles = _fmt(law.title)
         rows.append(
             f'<tr data-search="{_fmt(law.law_id + " " + law.title).lower()}">'
-            f'<td><code>{_fmt(law.law_id)}</code></td>'
+            f'<td><a href="laws/{_fmt(law.law_id)}.html"><code>{_fmt(law.law_id)}</code></a></td>'
             f'<td><span class="badge badge-{_fmt(law.type)}">{_fmt(law.type)}</span></td>'
             f"<td>{titles}</td>"
             f"<td>{_fmt(law.original_date)}</td>"
             f"<td>{_fmt(law.date_source)}</td>"
             f"<td class=\"num\">{len(law.consolidation_history)}</td>"
+            f'<td><a class="law-link" href="laws/{_fmt(law.law_id)}.html">Geçmiş →</a></td>'
             "</tr>"
         )
     return "".join(rows)
@@ -131,6 +132,109 @@ def _commit_rows(commits) -> str:
             "</tr>"
         )
     return "".join(rows)
+
+
+def _law_page_html(
+    engine: DeterministicGitEngine,
+    law,
+    entries: list,
+    cache: dict[tuple[str, str], str] | None = None,
+) -> str:
+    """Bir yasanın tüm commit geçmişini ve tam metin diff'lerini tek sayfada üretir."""
+    cards: list[str] = []
+    for entry in entries:
+        parent = engine.parent_commit(entry.commit_sha)
+        changed = (
+            engine.changed_files_between(parent, entry.commit_sha) if parent else []
+        )
+        has_article_change = any(change.path.endswith(".md") for change in changed)
+        if parent is None:
+            old = ""
+            new = _law_text(engine, law.law_id, entry.commit_sha, cache)
+            note = (
+                '<p class="diff-note">İlk yürürlük — önceki sürüm yok, '
+                "yalnızca yeni metin.</p>"
+            )
+        elif has_article_change:
+            old = _law_text(engine, law.law_id, parent, cache)
+            new = _law_text(engine, law.law_id, entry.commit_sha, cache)
+            note = ""
+        else:
+            old = _law_text(engine, law.law_id, parent, cache)
+            new = _law_text(engine, law.law_id, entry.commit_sha, cache)
+            note = (
+                '<p class="diff-note">Bu commit yalnızca metadata/atıf güncellemesi '
+                "içeriyor; madde metni değişmedi.</p>"
+            )
+        if old == new and parent is not None:
+            diff_html = '<p class="muted">Metin farkı yok.</p>'
+            change_count = 0
+        else:
+            diff_html = _side_by_side(old, new)
+            change_count = len(
+                [
+                    line
+                    for line in difflib.unified_diff(
+                        old.splitlines(), new.splitlines(), lineterm=""
+                    )
+                    if line.startswith(("+", "-")) and not line.startswith(("+++", "---"))
+                ]
+            )
+        cards.append(
+            f'<details class="diff-card"{" open" if parent is None else ""}>'
+            f'<summary><span class="diff-date">{_fmt(entry.effective_date)}</span>'
+            f'<strong>{_fmt(entry.subject)}</strong>'
+            f'<span class="diff-sha">{_fmt(entry.commit_sha[:8])}'
+            f" · {change_count} satır değişimi</span></summary>"
+            f'<div class="diff-body">{note}{diff_html}</div></details>'
+        )
+    body = "".join(cards) or '<p class="muted">Bu yasa için commit bulunamadı.</p>'
+    return f"""<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{_fmt(law.law_id)} · {_fmt(law.title)}</title>
+<style>
+:root {{ --ink:#0f172a; --muted:#64748b; --bg:#f4f7fb; --card:#fff;
+  --line:#e2e8f0; --accent:#0ea5a4; }}
+* {{ box-sizing:border-box; }}
+body {{ margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }}
+header {{ background:linear-gradient(120deg,#0f172a,#134e4a); color:#f8fafc;
+  padding:28px clamp(16px,4vw,54px); }}
+header a {{ color:#99f6e4; }} h1 {{ margin:8px 0; font-size:32px; }}
+header p {{ margin:4px 0; color:#cbd5e1; }}
+main {{ max-width:1280px; margin:0 auto; padding:24px; }}
+.meta {{ display:flex; gap:18px; flex-wrap:wrap; color:var(--muted); font-size:13px; }}
+.diff-card {{ background:var(--card); border:1px solid var(--line); border-radius:10px;
+  margin:12px 0; overflow:hidden; }}
+.diff-card summary {{ cursor:pointer; padding:11px 13px; display:flex; gap:10px;
+  align-items:center; flex-wrap:wrap; }}
+.diff-date, .diff-sha {{ color:var(--muted); font-size:11px;
+  font-family:ui-monospace,monospace; }} .diff-sha {{ margin-left:auto; }}
+.diff-body {{ border-top:1px solid var(--line); padding:10px; overflow:auto;
+  max-height:680px; background:#fff; }}
+.diff-note {{ margin:0 0 8px; padding:7px 10px; border-radius:7px; background:#fff7ed;
+  color:#9a3412; font-size:12px; }}
+.diff-table {{ width:100%; border-collapse:collapse; table-layout:fixed;
+  font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }}
+.diff-table td {{ padding:0 6px; vertical-align:top; white-space:pre-wrap;
+  overflow-wrap:anywhere; border-bottom:1px solid #f1f5f9; }}
+.diff-ln {{ color:#94a3b8; text-align:right; user-select:none; background:#f8fafc; }}
+.diff-cell {{ color:#334155; }} .diff-del {{ background:#fdecec; color:#991b1b; }}
+.diff-add {{ background:#e8f8ee; color:#166534; }} .diff-empty {{ background:#f8fafc; }}
+.diff-meta, .muted {{ color:var(--muted); }}
+</style></head><body>
+<header>
+<a href="../index.html">← Dashboard</a>
+<h1>{_fmt(law.law_id)} · {_fmt(law.title)}</h1>
+<div class="meta">
+<span>{_fmt(law.type)}</span><span>İlk yürürlük: {_fmt(law.original_date)}</span>
+<span>Tarih kaynağı: {_fmt(law.date_source)}</span>
+<span>{len(law.consolidation_history)} değişiklik kaydı</span>
+<span>{len(entries)} commit</span>
+</div></header>
+<main><p class="muted">Bu sayfa yasanın tüm commit geçmişini ve mevcut tam metin
+farklarını tek görünümde gösterir.</p>{body}</main></body></html>"""
 
 
 def _top_article_rows(stats) -> str:
@@ -163,8 +267,16 @@ def _collapse_repeated_lines(text: str) -> str:
     return "\n".join(deduped)
 
 
-def _law_text(engine: DeterministicGitEngine, law_id: str, commit_sha: str) -> str:
+def _law_text(
+    engine: DeterministicGitEngine,
+    law_id: str,
+    commit_sha: str,
+    cache: dict[tuple[str, str], str] | None = None,
+) -> str:
     """Bir yasanın tüm madde dosyalarını sıralı biçimde birleştirir."""
+    key = (law_id, commit_sha)
+    if cache is not None and key in cache:
+        return cache[key]
     prefix = f"laws/{law_id}/"
     paths = [
         path
@@ -178,7 +290,10 @@ def _law_text(engine: DeterministicGitEngine, law_id: str, commit_sha: str) -> s
             continue
         file_name = path.rsplit("/", 1)[-1]
         parts.append(f"<!-- {file_name} -->\n{_collapse_repeated_lines(content.rstrip())}")
-    return "\n\n".join(parts)
+    text = "\n\n".join(parts)
+    if cache is not None:
+        cache[key] = text
+    return text
 
 
 def _side_by_side(old: str, new: str, limit: int = 700) -> str:
@@ -244,7 +359,12 @@ def _side_by_side(old: str, new: str, limit: int = 700) -> str:
     )
 
 
-def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: int = 220) -> str:
+def _diff_section(
+    engine: DeterministicGitEngine,
+    commits: list,
+    max_commits: int = 220,
+    cache: dict[tuple[str, str], str] | None = None,
+) -> str:
     """Commit başına, değişen yasanın tam metnini eski/yeni yan yana gösterir."""
     diff_cards: list[str] = []
     new_law_cards: list[str] = []
@@ -259,8 +379,8 @@ def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: in
             if len(parts) == 3 and parts[0] == "laws":
                 law_ids.add(parts[1])
         for law_id in sorted(law_ids):
-            old = _law_text(engine, law_id, parent)
-            new = _law_text(engine, law_id, entry.commit_sha)
+            old = _law_text(engine, law_id, parent, cache)
+            new = _law_text(engine, law_id, entry.commit_sha, cache)
             if old == new:
                 continue
             is_new_law = not old
@@ -309,8 +429,13 @@ def _diff_section(engine: DeterministicGitEngine, commits: list, max_commits: in
     )
 
 
-def render_dashboard(engine: DeterministicGitEngine) -> str:
+def render_dashboard(
+    engine: DeterministicGitEngine,
+    cache: dict[tuple[str, str], str] | None = None,
+) -> str:
     """Mevcut Git snapshot'ından dashboard HTML'i üretir."""
+    if cache is None:
+        cache = {}
     stats = statistics_from_engine(engine)
     laws = engine.list_laws_as_of(None)
     commits = collect_commit_log(engine, limit=100000)
@@ -323,7 +448,7 @@ def render_dashboard(engine: DeterministicGitEngine) -> str:
         (f"{item.law_id} · {item.title[:38]}", item.amendment_count)
         for item in stats.top_laws
     ]
-    diff_html = _diff_section(engine, commits)
+    diff_html = _diff_section(engine, commits, cache=cache)
 
     return f"""<!DOCTYPE html>
 <html lang="tr">
@@ -478,7 +603,7 @@ footer {{ color:var(--muted); font-size:12px; text-align:center; padding:24px; }
     <div class="table-wrap">
       <table id="law-table">
         <thead><tr><th>Kimlik</th><th>Tür</th><th>Başlık</th><th>İlk yürürlük</th>
-        <th>Kaynak</th><th class="num">Değişiklik</th></tr></thead>
+        <th>Kaynak</th><th class="num">Değişiklik</th><th>Geçmiş</th></tr></thead>
         <tbody>{_law_rows(laws)}</tbody>
       </table>
     </div>
@@ -525,9 +650,25 @@ if (diffSearch) {{
 
 
 def build_dashboard(engine: DeterministicGitEngine, output_dir: str | Path) -> Path:
-    """Dashboard HTML'ini `output_dir/index.html` altına yazar."""
+    """Dashboard HTML'ini ve yasa başına geçmiş sayfalarını yazar."""
     directory = Path(output_dir)
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / "index.html"
-    target.write_text(render_dashboard(engine), encoding="utf-8", newline="\n")
+    cache: dict[tuple[str, str], str] = {}
+    target.write_text(
+        render_dashboard(engine, cache), encoding="utf-8", newline="\n"
+    )
+
+    laws = engine.list_laws_as_of(None)
+    commits = collect_commit_log(engine, limit=100000)
+    by_law: dict[str, list] = {}
+    for entry in commits:
+        by_law.setdefault(entry.law_id, []).append(entry)
+    law_dir = directory / "laws"
+    law_dir.mkdir(parents=True, exist_ok=True)
+    for law in laws:
+        page = _law_page_html(engine, law, by_law.get(law.law_id, []), cache)
+        (law_dir / f"{law.law_id}.html").write_text(
+            page, encoding="utf-8", newline="\n"
+        )
     return target

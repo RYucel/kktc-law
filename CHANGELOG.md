@@ -16,6 +16,8 @@ Sürümleme [Semantic Versioning](https://semver.org/lang/tr/) kurallarına uyar
 - `kktc-law dashboard` — dış servis gerektirmeyen statik HTML dashboard (özet kartları,
   CSS/SVG grafikler, yasa arama tablosu, commit akışı ve **tam yasa metni eski/yeni
   yan yana diff görünümü**) ve GitHub Pages deploy workflow'u.
+- Yasa tablosundan açılan `laws/<law_id>.html` sayfaları, bir yasanın tüm commit geçmişini
+  ve tam metin farklarını tek görünümde gösterir.
 - Parser, Word/OCR kaynaklarında üst üste 3+ kez tekrarlanan satırları tekilleştirir.
 
 ## [0.1.0] - 2026-11-02

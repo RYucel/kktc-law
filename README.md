@@ -122,7 +122,8 @@ uv run kktc-law --repo-path corpus_repo --json laws
 mantıksal madde güncellemelerini listeler. `dashboard/index.html` dış servis gerektirmez;
 GitHub Pages workflow'u (`Deploy dashboard`) bu klasörü yayınlar. Dashboard'da değişen yasaların
 **tam metni**, eski/yeni sürüm yan yana olacak şekilde GitHub benzeri kırmızı/yeşil
-git diff görünümüyle yer alır.
+git diff görünümüyle yer alır. Yasalar tablosundaki her yasa tıklanabilir; `laws/<law_id>.html`
+sayfası o yasanın tüm commit geçmişini ve tam metin farklarını tek görünümde açar.
 
 `read`, mülga görünen maddelerde metni yine yazdırır ancak stderr'e uyarı verir; bulunamayan
 madde veya yasa için sıfırdan farklı çıkış kodu döner.

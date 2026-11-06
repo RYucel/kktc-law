@@ -44,6 +44,12 @@ def test_dashboard_contains_cards_charts_and_laws(tmp_path: Path) -> None:
     target = build_dashboard(engine, tmp_path / "dashboard")
     assert target.is_file()
     assert "Yasalar" in target.read_text(encoding="utf-8")
+    law_page = tmp_path / "dashboard" / "laws" / "fasil-113.html"
+    assert law_page.is_file()
+    law_html = law_page.read_text(encoding="utf-8")
+    assert "fasil-113" in law_html
+    assert "commit" in law_html
+    assert "laws/fasil-113.html" in target.read_text(encoding="utf-8")
 
 
 def test_dashboard_cli(tmp_path: Path) -> None:
